@@ -1,0 +1,12 @@
+site_name: FRCProgramming
+theme:
+    name: material
+    palette:
+        primary: 'blue'
+        accent: 'cyan'
+    features:
+        - navigation.tabs
+        - navigation.top
+        - navigation.sections
+        - navigation.expand
+        - navigation.tracking

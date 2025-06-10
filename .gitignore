@@ -1,0 +1,28 @@
+# MkDocs build directory
+/site/
+
+# Python cache files
+__pycache__/
+*.py[cod]
+*.pyo
+
+# Virtual environments
+venv/
+.env/
+.venv/
+ENV/
+env/
+
+# macOS files
+.DS_Store
+
+# PyCharm project files
+.idea/
+
+# Logs and local settings
+*.log
+*.swp
+*.swo
+
+# Backup files
+*~
