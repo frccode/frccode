@@ -1,4 +1,4 @@
-# Welcome to FRCProgramming.org
+# Welcome to FRCCode.org
 
 For full documentation visit [mkdocs.org](https://www.mkdocs.org).
 
