@@ -10,3 +10,45 @@ theme:
         - navigation.sections
         - navigation.expand
         - navigation.tracking
+markdown_extensions:
+    - abbr
+    - attr_list
+    - md_in_html
+    - def_list
+    - md_in_html
+    - admonition
+    - pymdownx.details
+    - pymdownx.superfences
+    - pymdownx.snippets:
+          auto_append:
+              - includes/abbreviations.md
+    - pymdownx.superfences
+    - pymdownx.tabbed:
+          alternate_style: true
+    - pymdownx.emoji:
+          emoji_index: !!python/name:material.extensions.emoji.twemoji
+          emoji_generator: !!python/name:material.extensions.emoji.to_svg
+plugins:
+  - social:
+      cards_layout_dir: layouts
+      cards_layout: default_page
+      debug: false
+  - glightbox:
+      background: none
+      width: 90%
+      shadow: true
+  - search
+  - group: # These plugins only run when the site is deployed
+      enabled: !ENV CI
+      plugins:
+      - git-revision-date-localized:
+          enable_creation_date: true
+      #- optimize
+  - group:
+      enabled: !ENV INSIDERS
+      plugins:
+        - meta
+        - social:
+            cards_layout_dir: layouts
+            cards_layout: default_page
+            debug: false
