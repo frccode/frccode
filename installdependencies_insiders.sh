@@ -1,10 +1,6 @@
 # You must run this with the Git for Windows SDK shell, navigating to the cloned repository (cd ~/Documents/GitHub/[repository name]) and run ./installdependencies_insiders.sh
 # After installing the Git SDK, check the version of python with py --version and make sure it's 3.12.4. If it's not, install python 3.12.4 from the Windows Store and check again.
 
-# Create the file with your token
-echo "Enter the token for INSIDERS access:"
-read INSIDERS
-echo "INSIDERS=$INSIDERS" >> .env
 
 
 # Installing python, git, and gcc
