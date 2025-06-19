@@ -10,7 +10,7 @@ Furthermore, due to its popularity as a first programming language in high-schoo
 
 When choosing a programming language for your team, you should choose the language that your team has the most experience and is the most comfortable working in. This experience will make learning programming that much easier—there is much in FRC programming regardless of your language. 
 
-However, for the above reasons, this guide will focus on Java as the primary programming language. In the future, we may look to expand support to C++ and Python, but these languages have zero support at this time. 
+However, for the above reasons, this guide will focus on Java as the primary programming language. In the future, we may look to expand support to C++ and Python, but the guide offers no support for these languages at this time. 
 
 Thus, to begin programming, you must first have a solid background in the Java programming language.
 
