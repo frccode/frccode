@@ -18,3 +18,6 @@ FRC programming requires multiple applications to be downloaded onto your comput
    - SysId
    - WPIcal
  - Github & Github Desktop
+ - National Instruments Game Tools
+   - FRC Driver Station
+   - roboRIO Imaging Tool
