@@ -17,7 +17,7 @@ Thus, to begin programming, you must first have a solid background in the Java p
 
 ## Prerequisites
 !!! Tip
-    It isn't necessary to learn all of Java, particularly when it comes to Object-Oriented Programming. Because FRC programming uses of a subset of the language to accomplish most tasks, it is possible to start this course with a very surface level understanding of basic syntax. However, for more advanced behavior and programs, advanced Java may become more important. 
+    It isn't necessary to learn all of Java, particularly when it comes to Object-Oriented Programming. Because FRC programming uses of a subset of the language to accomplish most tasks, it is possible to start this course with a very surface level understanding of basic syntax. However, for more advanced behavior and programs, a deeper understanding of Java will become more important. 
 
 
 To be able to start learning FRC Programming, a strong foundation in programming is necessary. Below is a list of topics that any FRC programmer should know:
