@@ -1,5 +1,5 @@
 site_name: FRCCode
-site:url: https://frccode.github.io
+site_url: https://frccode.github.io
 theme:
     name: material
     palette:
