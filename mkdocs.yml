@@ -1,4 +1,5 @@
-site_name: FRCProgramming
+site_name: FRCCode
+site:url: https://frccode.github.io
 theme:
     name: material
     palette:
@@ -30,9 +31,11 @@ markdown_extensions:
           emoji_generator: !!python/name:material.extensions.emoji.to_svg
 plugins:
   - social:
-      cards_layout_dir: layouts
-      cards_layout: default_page
-      debug: false
+      enabled: true               # turns it on
+      debug_on_build: false       # replaces `debug`
+      cards_layout_options:
+        layout_dir: layouts       # replaces cards_layout_dir
+        variant: default_page     # replaces cards_layout
   - glightbox:
       background: none
       width: 90%
