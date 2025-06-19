@@ -36,10 +36,10 @@ plugins:
       cards_layout_options:
         layout_dir: layouts       # replaces cards_layout_dir
         variant: default_page     # replaces cards_layout
-  - glightbox:
-      background: none
-      width: 90%
-      shadow: true
+  # - glightbox:                  # not recognized in ci --ajs 2025-06-18
+  #     background: none
+  #     width: 90%
+  #     shadow: true
   - search
   - group: # These plugins only run when the site is deployed
       enabled: !ENV CI
