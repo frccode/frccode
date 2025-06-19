@@ -32,12 +32,12 @@ markdown_extensions:
           emoji_index: !!python/name:material.extensions.emoji.twemoji
           emoji_generator: !!python/name:material.extensions.emoji.to_svg
 plugins:
-  - social:
-      enabled: true               # turns it on
-      debug_on_build: false       # replaces `debug`
-      cards_layout_options:
-        layout_dir: layouts       # replaces cards_layout_dir
-        variant: default_page     # replaces cards_layout
+#  - social:
+#      enabled: true               # turns it on
+#      debug_on_build: false       # replaces `debug`
+#      cards_layout_options:
+#        layout_dir: layouts       # replaces cards_layout_dir
+#        variant: default_page     # replaces cards_layout
   # - glightbox:                  # not recognized in ci --ajs 2025-06-18
   #     background: none
   #     width: 90%
@@ -53,10 +53,10 @@ plugins:
       enabled: !ENV INSIDERS
       plugins:
         - meta
-        - social:
-            cards_layout_dir: layouts
-            cards_layout: default_page
-            debug: false
+#        - social:
+#            cards_layout_dir: layouts
+#            cards_layout: default_page
+#            debug: false
 extra:
   analytics:
     feedback:
