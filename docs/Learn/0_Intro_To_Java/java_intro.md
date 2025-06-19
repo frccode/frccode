@@ -44,11 +44,11 @@ Cultivating a strong command of Java can be accomplished through a range of publ
 - **[Oracle Java Tutorials](https://docs.oracle.com/javase/tutorial/)**  
   The official documentation and tutorials maintained by Oracle, providing authoritative coverage of the language.
 
-- **[Bro Code (YouTube Channel)](https://www.youtube.com/@TheBroCode)**  
+- **[Bro Code (YouTube Channel)](https://www.youtube.com/watch?v=23HFxAPyJ9U&list=PLZPZq0r_RZOOj_NOZYq_R2PECIMglLemc)**  
   A YouTube series offering concise Java tutorials and hands-on projects, ideal for visual learners.
 
-- **[freeCodeCamp Java Tutorial for Beginners](https://www.freecodecamp.org/news/java-tutorial-for-beginners/)**  
+- **[freeCodeCamp Java Tutorial for Beginners](https://www.freecodecamp.org/news/the-java-handbook/)**  
   A comprehensive, no-cost guide (written + video) covering Java fundamentals in depth.
 
-- **[JetBrains Academy: Java Developer Track](https://www.jetbrains.com/academy/)**  
-  A project-based learning environment that weaves coding exercises into real-world Java applications.
+- **[JetBrains Academy: Java Developer Track](https://academy.jetbrains.com/course/18905-java-for-beginners)**  
+  A project-based learning environment that weaves coding exercises into real-world Java applications. (IntelliJ Only)
