@@ -18,7 +18,7 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: 3.x
-      - run: bash ./install-dependencies.sh
+      - run: cd $GITHUB_WORKSPACE && ./install-dependencies.sh
       - run: echo "cache_id=$(date --utc '+%V')" >> $GITHUB_ENV 
       - uses: actions/cache@v4
         with:
