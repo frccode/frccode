@@ -1,5 +1,5 @@
 ---
-title: FRCCode.org
+title: FRCCode
 social:
   cards_layout: homepage
 hide:
@@ -15,7 +15,7 @@ hide:
 ---
 
 !!! note
-    Still chatgpt version, needs work
+    Still chatgpt version, needs a lot of work
   
 
 ## 🔥 Quick Jump

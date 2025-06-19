@@ -1,10 +1,10 @@
-# Part 0 - Introduction to Java in FRC Programming
+# Introduction to Java in FRC Programming
 
 !!! note
     wrote: sean | edited: tycho | still needs proofreading - may be too long
 
 ### Choosing a Programming Language
-While possible to use Python and C++ to program competition robots, most teams choose to use Java (89.2% in 2025!). Python is more beginner-friendly, and C++ is more powerful, but Java provides a good middle ground between performance, capability, and ease of use. 
+While possible to use Python and C++ to program competition robots, most teams choose to use Java (89.2% in 2025). Python is more beginner-friendly, and C++ is more powerful, but Java provides a good middle ground between performance, capability, and ease of use. 
 
 Furthermore, due to its popularity as a first programming language in high-school curricula (in part through AP CSA), and its widespread online support, Java is a strong choice for most teams. 
 
