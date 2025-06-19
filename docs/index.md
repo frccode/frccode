@@ -1,17 +1,17 @@
-# Welcome to FRCCode.org
+# Welcome to FRCProgramming.org
 
-For full documentation visit [mkdocs.org](https://www.mkdocs.org).
+FRCCode.org is built by a community of FRC programmers, mentors, and alumni.
 
-## Commands
+<center markdown>
+[Contributors List](contribution/contributors.md){.md-button .md-button--primary}
+</center>
 
-* `mkdocs new [dir-name]` - Create a new project.
-* `mkdocs serve` - Start the live-reloading docs server.
-* `mkdocs build` - Build the documentation site.
-* `mkdocs -h` - Print help message and exit.
+## Discord
 
-## Project layout
+Join the FRCCode Discord to share code, ask questions, and get feedback.
 
-    mkdocs.yml    # The configuration file.
-    docs/
-        index.md  # The documentation homepage.
-        ...       # Other markdown pages, images and other files.
+<center markdown>
+[![](/img/discord-link.webp){width=20%}](https://discord.gg/your-server-code)
+</center>
+
+<br>
