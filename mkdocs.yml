@@ -1,5 +1,7 @@
 site_name: FRCCode
-site_url: https://frccode.github.io
+site:url: https://frccode.github.io
+repo_url: https://github.com/frccode/frccode
+repo_name: frccode/frccode
 theme:
     name: material
     palette:
@@ -55,3 +57,19 @@ plugins:
             cards_layout_dir: layouts
             cards_layout: default_page
             debug: false
+extra:
+  analytics:
+    feedback:
+      title: Was this page helpful?
+      ratings:
+        - icon: material/emoticon-happy-outline
+          name: This page was helpful
+          data: 1
+          note: >-
+            Thanks for your feedback!
+        - icon: material/emoticon-sad-outline
+          name: This page could be improved
+          data: 0
+          note: >- 
+            Thanks for your feedback! Help us improve this page by
+            using our <a href="..." target="_blank" rel="noopener">feedback form</a>.
