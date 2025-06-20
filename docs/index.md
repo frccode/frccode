@@ -8,17 +8,16 @@ hide:
 ---
 
 <div class="hero" markdown>
-  # 🚀 Welcome to **FRCCode.org**
-  **Where Competition Meets Clean Code**
+  # Welcome to **FRCCode.org**
+  **The Best FRC Software Tutorial**
 </div>
 
 ---
 
 !!! note
-    Still chatgpt version, needs a lot of work
-  
+    Still tycho's version, needs a lot of work
 
-## 🔥 Quick Jump
+## Quick Jump
 
 <div class="grid cards" markdown>
 
