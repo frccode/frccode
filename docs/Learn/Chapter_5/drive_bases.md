@@ -4,4 +4,9 @@
 > - Differential
 > - Swerve
 
-insert link here later
+!!! Tip "West Coast Drive"
+    West Coast Drive is really just Tank Drive.
+
+## Article
+Go through the following link:
+> https://docs.revrobotics.com/frc-kickoff-concepts/2023/drivetrains
