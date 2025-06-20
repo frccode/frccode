@@ -4,8 +4,8 @@
 > https://docs.wpilib.org/en/stable/docs/zero-to-robot/step-2/wpilib-setup.html
 2. Follow the instructions provided to install the latest version of WPILib.
 
-!!! Warning
-    If you also have the regular version of VSCode, you might get it confused with Wpilib VSCode.
+!!! Warning "Wpilib VSCode vs VSCode"
+    Wpilib uses its own version VSCode which is impossible to tell apart from regular VSCode from the outside, so make sure you don't get them mixed up.
 
 WPILib includes many other tools that are helpful in robot programming, including:
 
