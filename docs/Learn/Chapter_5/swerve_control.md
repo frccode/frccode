@@ -113,7 +113,7 @@ Where:
 - `(x', y')` = Robot-relative coordinates  
 - `θ` = Robot orientation
 
-## 4. Additional Control Concepts
+## 4. Control Systems
 
 ### Speed Desaturation
 

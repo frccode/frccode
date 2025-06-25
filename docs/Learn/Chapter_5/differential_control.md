@@ -25,7 +25,9 @@ This guide covers the programming concepts needed to implement a differential (t
 ## 2. Core Concepts
 
 **Differential (Tank) Drive**
-A differential (tank) drive system consists of two sets of wheels—left and right—that are powered independently. The robot turns by varying the speed between the two sides, allowing for precise control of direction. This configuration is simple, robust, and widely used in FRC due to its reliability and ease of implementation.
+- Two sets of wheels (left and right) powered independently
+- Robot turns by varying speed between sides
+- Simple, robust, and widely used in FRC
 
 ### Control Methods
 
@@ -43,17 +45,13 @@ A differential (tank) drive system consists of two sets of wheels—left and rig
 - **Encoders**: Measure wheel rotation for distance/speed
 - **Gyro**: Measures robot heading (optional but recommended)
 
-
 ### Key Classes in WPILIB
-
-Listed here are the objects/libraries from wpilib that are used to help with writing a diffierential drive. 
 
 **DifferentialDrive**
 ```java
 // Controls left and right motors
 DifferentialDrive drive = new DifferentialDrive(leftMotor, rightMotor);
 ```
-
 
 **ChassisSpeeds**
 ```java
@@ -69,14 +67,7 @@ ChassisSpeeds chassisSpeeds = new ChassisSpeeds(
 
 ### Kinematics
 
-In the context of FRC drives, **kinematics** refers to the mathematical relationships that describe how the robot's wheel speeds translate to its overall movement (position, velocity, and rotation) on the field, and vice versa. For differential (tank) drive systems, kinematics allows you to:
-
-- Determine the robot's forward and rotational velocities based on the speeds of the left and right wheels (forward kinematics).
-- Calculate the required wheel speeds to achieve a desired robot motion (inverse kinematics).
-
-Understanding kinematics is essential for tasks such as autonomous path following, odometry, and precise control of the robot's movement.
-
-**Tank drive kinematics relate left/right wheel speeds to robot motion.**
+Tank drive kinematics relate left/right wheel speeds to robot motion.
 
 **Forward Kinematics:**
 - Calculate robot velocity from left/right wheel speeds
@@ -97,7 +88,7 @@ Where:
 ## 4. Control Systems
 
 ### Speed Control
-Use PID control for precise velocity control of each side. Place this code within your drive subsystem periodic loop:
+Use PID control for precise velocity control of each side:
 ```java
 double leftOutput = leftPID.calculate(currentLeftSpeed, targetLeftSpeed);
 double rightOutput = rightPID.calculate(currentRightSpeed, targetRightSpeed);
@@ -126,9 +117,6 @@ WPILIB uses the same coordinate system as swerve drive. Consistency is important
 ## 6. Implementation Guide
 
 ### Basic Tank Drive Class Structure
-Implement this class as a template subsystem for your differential drive. This class is the factory that will run your differential drive.
-
-Call the drive method periodically to set forward, backwards, and rotational speeds.
 ```java
 public class TankDrive extends SubsystemBase {
     private final DifferentialDrive drive;
@@ -150,53 +138,21 @@ public class TankDrive extends SubsystemBase {
 ```
 
 ### Teleop Command Implementation
-
-Use this command template for controlling your differential drive using suppliers. Refer to [Suppliers](../drive_bases.md#suppliers).
 ```java
 public class TeleopTankCommand extends CommandBase {
     private final TankDrive tankDrive;
-    private final Supplier<Double> forwardSupplier;
-    private final Supplier<Double> rotationSupplier;
-
-    public TeleopTankCommand(
-        TankDrive tankDrive,
-        Supplier<Double> forwardSupplier,
-        Supplier<Double> rotationSupplier
-    ) {
-        this.tankDrive = tankDrive;
-        this.forwardSupplier = forwardSupplier;
-        this.rotationSupplier = rotationSupplier;
-        addRequirements(tankDrive);
-    }
+    private final XboxController controller;
 
     @Override
     public void execute() {
-        double forward = MathUtil.applyDeadband(forwardSupplier.get(), 0.1);
-        double rotation = MathUtil.applyDeadband(rotationSupplier.get(), 0.1);
+        double forward = -controller.getLeftY();
+        double rotation = -controller.getRightX();
+        forward = MathUtil.applyDeadband(forward, 0.1);
+        rotation = MathUtil.applyDeadband(rotation, 0.1);
         tankDrive.drive(forward, rotation);
     }
 }
 ```
-### Example Usage in RobotContainer
-
-```java
-public class RobotContainer {
-    private final TankDrive tankDrive = new TankDrive();
-    private final CommandXboxController driverController = new CommandXboxController(0);
-
-    public RobotContainer() {
-        // Set the default command for teleop driving
-        tankDrive.setDefaultCommand(
-            new TeleopTankCommand(
-                tankDrive,
-                () -> -driverController.getLeftY(),
-                () -> -driverController.getRightX()
-            )
-        );
-    }
-}
-```
-
 
 ## 7. Code Examples
 
@@ -243,3 +199,4 @@ public void updateOdometry() {
 
 ---
 
+*This guide is based on FRC programming best practices and includes implementation details for new programmers.*

@@ -65,25 +65,11 @@ Velocity
 - **Start State** - Current position and velocity
 - **End State** - Target position and velocity (usually 0)
 
-### Analogy: Driving a Car with and without Motion Profiling
-
-Imagine you're driving a car to a stop sign:
-
-- **Without Motion Profiling (Basic PID Only):**  
-    You slam the gas pedal to reach the stop sign as quickly as possible, then stomp on the brakes at the last moment. The car lurches forward, passengers get tossed around, and you might overshoot or stop short. This is how basic PID works—reacting to errors without planning the whole journey.
-
-- **With Motion Profiling + PID:**  
-    Instead, you plan your drive: gently accelerate, cruise at a comfortable speed, then smoothly slow down so you stop exactly at the sign. Motion profiling creates this plan—defining how fast to go and when to speed up or slow down. PID then acts like your cruise control, making small adjustments to keep you on the planned path.
-
-**Summary:**  
-Motion profiling is like planning your route and speed ahead of time for a smooth, predictable trip. PID is your assistant, making sure you follow that plan precisely, correcting for hills or bumps along the way.
-
 ---
 
-## 3. Basic Motion Profile Implementation
+## 3. Basic Implementation
 
 ### Step 1: Create the Profile
-These are the necessary components to setup a motion profile subsystem using available hardware.
 ```java
 public class ElevatorSubsystem extends SubsystemBase {
     private final CANSparkMax motor;
@@ -110,8 +96,6 @@ public class ElevatorSubsystem extends SubsystemBase {
 ```
 
 ### Step 2: Start a Profiled Movement
-
-Write these methods within your subsystems so existing commands or periodics can set position for your mechanism.
 ```java
 public void setTargetPosition(double targetPosition) {
     // Current state (where we are now)
@@ -136,8 +120,6 @@ private double getVelocity() {
 ```
 
 ### Step 3: Follow the Profile
-
-In your subsystem periodic, this logic will run your looped motion profile.
 ```java
 @Override
 public void periodic() {
@@ -171,7 +153,7 @@ public boolean isAtTarget() {
 
 ---
 
-## 4. Standard Implementation: WPILib's ProfiledPIDController
+## 4. WPILib's ProfiledPIDController
 
 ### Simplified Implementation
 WPILib combines profiling + PID into one easy class:
@@ -221,6 +203,29 @@ public class ArmSubsystem extends SubsystemBase {
 }
 ```
 
+### Command Usage
+```java
+public class MoveArmCommand extends CommandBase {
+    private final ArmSubsystem arm;
+    private final double targetAngle;
+    
+    public MoveArmCommand(ArmSubsystem arm, double angle) {
+        this.arm = arm;
+        this.targetAngle = angle;
+        addRequirements(arm);
+    }
+    
+    @Override
+    public void initialize() {
+        arm.setTargetAngle(targetAngle);
+    }
+    
+    @Override
+    public boolean isFinished() {
+        return arm.atTarget();
+    }
+}
+```
 
 ---
 
@@ -411,7 +416,7 @@ public void periodic() {
 
 ## Where to Go Next
 
-**More resources:**
+**Ready for advanced motion control? Explore these:**
 
 **🎯 Advanced Profiling**
 - [WPILib Trajectory Generation](https://docs.wpilib.org/en/stable/docs/software/pathplanning/trajectory-generation.html) - Multi-dimensional paths
@@ -431,5 +436,6 @@ public void periodic() {
 
 ---
 
+**🚀 Ready to smooth out your robot?** Start with a simple elevator or arm, then apply motion profiling to create professional-grade movement that's predictable, smooth, and easy to coordinate!
 
 **Next steps:** Advanced trajectory optimization and feedforward control using [WPILib's trajectory documentation](https://docs.wpilib.org/en/stable/docs/software/pathplanning/index.html).
