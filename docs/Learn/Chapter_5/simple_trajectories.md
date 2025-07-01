@@ -6,8 +6,6 @@ Swerve trajectory combines the power of motion profiling with holonomic movement
 
 **What you'll build:** A robot that smoothly follows pre-planned paths with independent rotation control.
 
-**Next steps:** Advanced path planning and real-time trajectory generation using [WPILib's PathPlanner](https://pathplanner.dev/) and [trajectory documentation](https://docs.wpilib.org/en/stable/docs/software/pathplanning/index.html).
-
 ---
 
 ## 1. Why Swerve Trajectories?
@@ -545,4 +543,4 @@ public class FaceTargetWhileMoving extends CommandBase {
 
 ---
 
-**🚀 Ready to plan perfect paths?** Start with simple trajectories, master the basics, then explore visual path planning tools to create competition-winning autonomous routines!
+**Next steps:** Advanced path planning and real-time trajectory generation using [WPILib's PathPlanner](https://pathplanner.dev/) and [trajectory documentation](https://docs.wpilib.org/en/stable/docs/software/pathplanning/index.html).
