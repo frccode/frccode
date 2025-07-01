@@ -1,24 +1,43 @@
-# PID Control: Getting Started
+# Basic Control Theory
 
 ## Overview
 
-PID control is the foundation of precise robot movement. Instead of manually setting motor speeds, PID automatically adjusts power based on where you are versus where you want to be. This guide teaches you the basics to get your mechanisms moving accurately.
+This guide teaches you the basics to get your position/velocity based elevator/pivot/flywheel/extending tube  mechanisms moving accurately and covers why these systems work and are so wildly used.
 
 **What you'll build:** A position-controlled mechanism (arm, elevator, etc.) that smoothly moves to target positions.
 
 ---
 
-## 1. Why Use PID Control?
+## 1. Why PID?
 
-**The Problem with Manual Control**
+For this senario, let's use an elevator and model its motion using different control methods.
+
+**Manual Control?** This switches our controls method on and keeps in on indefinetely.
+
 ```java
-// This doesn't work well:
 if (currentPosition < targetPosition) {
-    motor.set(0.5);  // Always same speed, regardless of distance
+    motor.set(0.5); // Full speed regardless of position
+}
+```
+This control method doesn't work for as it alwasy sets the same speed regardless of distance. In the case of our elevator, with a set speed it will keep rising past the distance you want it set too. Let's move to a new model.
+
+**Bang-bang control?** 
+This switches the our control method fully on or off depending on which side of the target you're on, solving our previous issue about the elevator "not knowing where to stop."
+
+```java
+if (currentPosition < targetPosition) {
+    motor.set(1.0);  // Full speed forward
+} else {
+    motor.set(-1.0); // Full speed backward
 }
 ```
 
-**PID's Smart Solution**
+However, Bang-bang control leads to jerky, abrupt movements that make it difficult to stop precisely at the target. This lack of smoothness can also increase wear on mechanical parts over time.
+
+
+
+**PID's Smart Solution** PID control is the foundation of precise robot movement. Instead of manually setting motor speeds, PID automatically adjusts power based on where you are versus where you want to be. 
+
 - **Far from target:** Move fast
 - **Close to target:** Move slow  
 - **At target:** Stop precisely
@@ -31,33 +50,35 @@ if (currentPosition < targetPosition) {
 
 ---
 
-## 2. The Three Components Explained
+## 2. How to setup a simple PID controller
 
 ### kP (Proportional) - "How far off am I?"
 ```java
-error = target - current;
+error = target - currentPosition;
 output = kP * error;
 ```
+![Proportional Term Visualization](./P_term.png)
 
-**What it does:** Provides power proportional to distance from target
+**What it does:** Provides power proportional to distance from target.  
+
+The graph above shows how the output of a P controller increases linearly with the error. The farther you are from the target, the stronger the correction; as you approach the target, the output decreases, resulting in smoother stopping.
+
 - **Large error:** High power
 - **Small error:** Low power  
 - **Zero error:** No power
-
-**Tuning tip:** Start here! Increase until it moves quickly but doesn't overshoot wildly.
 
 ### kD (Derivative) - "How fast am I approaching?"
 ```java
 rateOfChange = (currentError - previousError) / deltaTime;
 output = kD * rateOfChange;
 ```
+![Derivative Term Visualization](./D_term.png)
 
-**What it does:** Slows down as you approach the target
+**What it does:** Slows down as you approach the target. 
+When the error changes rapidly (steep slope), the D output is high and acts to slow the system down, preventing overshoot. When the error changes slowly, the D output is small, allowing the system to approach the target smoothly.
 - **Approaching fast:** Reduces power (acts like brakes)
 - **Approaching slow:** Minimal effect
 - **Moving away:** Adds power
-
-**Tuning tip:** Add this if kP alone causes overshoot. Bigger values = gentler approach.
 
 ### kI (Integral) - "How long have I been off?"
 ```java
@@ -65,15 +86,24 @@ errorSum += error * deltaTime;
 output = kI * errorSum;
 ```
 
-**What it does:** Eliminates steady-state error over time
+![Integral Term Visualization](./I_term.png)
+
+**What it does:** Eliminates steady-state error over time. 
+
+Simplfying calculus terms, if we model the "area" of error that has occured, that increasing error over time can be multiplied by a constant to "push" our control system to reach it's position. 
+
 - **Persistent small error:** Gradually increases power
 - **At target:** Resets to zero
 
-**Warning:** Use sparingly! Can cause instability if too high.
-
 ---
 
-## 3. Quick Start Implementation
+## 3. Tutorial Implementation
+This tutorial covers writing introduction code that will get you started on writing/testing FRC code using commonly available hardware.
+
+<!-- 
+**TODO:** Add links to other sections of the training that demonstrate how to implement the required hardware systems (e.g., wiring, configuring CANSparkMax, setting up encoders) for a complete setup.
+-->
+
 
 ### Basic Position Control Setup
 ```java
@@ -102,30 +132,6 @@ public class ArmSubsystem extends SubsystemBase {
 }
 ```
 
-### Command-Based Usage
-```java
-public class MoveArmCommand extends CommandBase {
-    private final ArmSubsystem arm;
-    private final double targetPosition;
-    
-    public MoveArmCommand(ArmSubsystem arm, double target) {
-        this.arm = arm;
-        this.targetPosition = target;
-        addRequirements(arm);
-    }
-    
-    @Override
-    public void execute() {
-        arm.setTargetPosition(targetPosition);
-    }
-    
-    @Override
-    public boolean isFinished() {
-        return arm.atTarget();
-    }
-}
-```
-
 ---
 
 ## 4. Step-by-Step Tuning Process
@@ -138,21 +144,27 @@ pidController = new PIDController(0.0, 0.0, 0.0);
 1. Set kI and kD to 0
 2. Gradually increase kP until the system moves toward the target
 3. Keep increasing until it oscillates around the target
-4. Reduce kP by 25-50%
+4. Reduce kP by 25-50% or until the system stops occilating
 
 **Good kP signs:**
 - Moves quickly to target
 - Small overshoot or oscillation
 - Settles near (but not exactly at) target
 
+If your your control system settles within an error range that is acceptable for your mechanism, congrats! This is all you need to do.
+
+If you need even greater precision and a smaller error range, continue to the next steps.
+
 ### Step 2: Add D for Smoothness
 ```java
 pidController = new PIDController(yourKp, 0.0, 0.01);
 ```
+**Tuning tip:** Add this if kP alone causes overshoot. Bigger values = gentler approach.
 
 1. Start with small kD (try 10-100x smaller than kP)
-2. Increase until overshoot is eliminated
-3. Too much kD makes response sluggish
+2. Increase in smalle amounts until overshoot is eliminated
+
+**Warning:** Too much kD makes response sluggish
 
 **Good kD signs:**
 - Smooth approach to target
@@ -164,7 +176,7 @@ pidController = new PIDController(yourKp, 0.0, 0.01);
 pidController = new PIDController(yourKp, 0.001, yourKd);
 ```
 
-1. Only add if system doesn't reach exact target
+1. Only add if system doesn't reach exact target or if it feels that the system needs a small "push" to make it to target position
 2. Start very small (1000x smaller than kP)
 3. Increase slowly until steady-state error disappears
 
@@ -196,7 +208,7 @@ pidController.setTolerance(0.1); // 0.1 inch tolerance
 
 ## 6. Essential Debugging Tips
 
-### Monitor Your Values
+### Monitor Your Values (Smart Dashboard)
 ```java
 @Override
 public void periodic() {
@@ -206,6 +218,21 @@ public void periodic() {
     SmartDashboard.putNumber("Arm Output", lastPIDOutput);
 }
 ```
+### Using AdvantageKit for Telemetry
+
+```java
+import org.littletonrobotics.advantagekit.AKLog;
+
+@Override
+public void periodic() {
+    Logger.recordOutput("Arm/Position", encoder.getPosition());
+    Logger.recordOutput("Arm/Target", pidController.getSetpoint());
+    Logger.recordOutput("Arm/Error", pidController.getPositionError());
+    Logger.recordOutput("Arm/Output", lastPIDOutput);
+}
+```
+Using Advantagekit or Epilogue Annotation enables powerful real-time and post-match debugging with tools like AdvantageScope.
+
 
 ### Common Problems & Solutions
 
