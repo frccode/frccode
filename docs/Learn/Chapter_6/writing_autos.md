@@ -1,4 +1,4 @@
-I understand now! You want me to reformat the autonomous programming guide to match the style and structure of the Basic Control Theory document. Here's the autonomous guide modeled after your provided format:
+
 
 # FRC Autonomous Programming
 
@@ -403,51 +403,54 @@ public class SuperstructureSubsystem extends SubsystemBase {
 
 ## 7. Autonomous Routine Scripting
 
-### Command-Based Autonomous Structure
+### Command-Based Autonomous Structure (Inline Factory Implementation)
+
+While there are many different command based formats for constructing autonomous commands based on each teams individual robot code structure preferences, this is the simplest implementation.
+
+Store these autonomous command and others like it within your "RobotContainer" Class. This makes it easy for you to pass in the subsystems as parameters needed to run the autonomous program.
 ```java
-public class ThreePieceAuto extends SequentialCommandGroup {
-    public ThreePieceAuto(
-        DriveSubsystem drive, 
-        SuperstructureSubsystem superstructure,
-        IntakeSubsystem intake
-    ) {
-        addCommands(
-            // Score preloaded game piece
-            new ParallelCommandGroup(
-                new ScoreHigh(superstructure),
-                new PrepareForIntake(intake)
-            ),
-            
-            // Drive to first game piece while deploying intake
-            new ParallelDeadlineGroup(
-                new FollowTrajectory(drive, "ToFirstPiece"),
-                new IntakeGamePiece(intake)
-            ),
-            
-            // Return and score second piece  
-            new ParallelCommandGroup(
-                new FollowTrajectory(drive, "FirstPieceReturn"),
-                new PrepareToScore(superstructure)
-            ),
-            new ScoreMid(superstructure),
-            
-            // Get third piece
-            new ParallelDeadlineGroup(
-                new FollowTrajectory(drive, "ToSecondPiece"), 
-                new IntakeGamePiece(intake)
-            ),
-            
-            // Final score and positioning
-            new ParallelCommandGroup(
-                new FollowTrajectory(drive, "FinalScore"),
-                new PrepareToScore(superstructure)
-            ),
+// Inline SequentialCommandGroup factory for Three Piece Auto
+public Command getThreePieceAuto(
+    DriveSubsystem drive, 
+    SuperstructureSubsystem superstructure,
+    IntakeSubsystem intake
+) {
+    return new SequentialCommandGroup(
+        // Score preloaded game piece
+        new ParallelCommandGroup(
             new ScoreHigh(superstructure),
-            
-            // End in good position for teleop
-            new FollowTrajectory(drive, "FinalPosition")
-        );
-    }
+            new PrepareForIntake(intake)
+        ),
+
+        // Drive to first game piece while deploying intake
+        new ParallelDeadlineGroup(
+            new FollowTrajectory(drive, "ToFirstPiece"),
+            new IntakeGamePiece(intake)
+        ),
+
+        // Return and score second piece  
+        new ParallelCommandGroup(
+            new FollowTrajectory(drive, "FirstPieceReturn"),
+            new PrepareToScore(superstructure)
+        ),
+        new ScoreMid(superstructure),
+
+        // Get third piece
+        new ParallelDeadlineGroup(
+            new FollowTrajectory(drive, "ToSecondPiece"), 
+            new IntakeGamePiece(intake)
+        ),
+
+        // Final score and positioning
+        new ParallelCommandGroup(
+            new FollowTrajectory(drive, "FinalScore"),
+            new PrepareToScore(superstructure)
+        ),
+        new ScoreHigh(superstructure),
+
+        // End in good position for teleop
+        new FollowTrajectory(drive, "FinalPosition")
+    );
 }
 ```
 
