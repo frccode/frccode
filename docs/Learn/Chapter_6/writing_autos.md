@@ -1,113 +1,24 @@
-
-
-# FRC Autonomous Programming
+# **FRC Autonomous Programming - Technical Implementation**
 
 ## Overview
 
-This guide teaches you how to design and implement high-performance autonomous routines for FRC robots, covering strategic planning, technical implementation, and systematic testing approaches.
+This guide covers the technical implementation of autonomous routines for FRC robots, including control systems, tuning processes, state machines, and testing methodologies.
 
-**What you'll build:** A complete autonomous system that can reliably score points, position your robot advantageously, and adapt to different match scenarios.
+> **Note:** This guide assumes you have completed the strategic planning process covered in [FRC Autonomous Programming - Strategy and Planning](../autonomous_strategy.md).
 
----
-
-## 1. Why Autonomous Matters?
-
-For competitive FRC teams, autonomous mode is often the difference between winning and losing matches.
-
-**Simple Mobility?** This gets your robot moving but doesn't maximize scoring potential.
-
-```java
-// Basic mobility - just drive forward
-public Command getMobilityAuto() {
-    return new DriveForward(driveSubsystem, 3.0); // Drive 3 meters
-}
-```
-This approach works but leaves significant points on the table and provides no strategic advantage.
-
-**Static Autonomous?** This scores a preloaded game piece but doesn't adapt to field conditions.
-
-```java
-// Static preload scoring
-public Command getPreloadAuto() {
-    return new SequentialCommandGroup(
-        new ScorePreload(superstructure),
-        new DriveForward(driveSubsystem, 3.0)
-    );
-}
-```
-
-However, static autonomous routines can't adapt to alliance partners, field conditions, or strategic needs that change throughout a competition.
-
-**Strategic Autonomous** Autonomous routines designed around game analysis, alliance coordination, and robust execution provide:
-
-- **Maximum point potential:** Score multiple game pieces efficiently
-- **Strategic positioning:** End in advantageous locations for teleop
-- **Alliance coordination:** Complement rather than conflict with partners  
-- **Tiebreaker advantage:** Auto points often determine close matches
-- **Consistent execution:** Work reliably across different field conditions
-
-**Real Benefits**
-- Significant competitive advantage in qualification matches
-- Higher alliance selection value 
-- Better playoff performance through coordination
-- Psychological advantage over opponents
+**What you'll build:** A complete technical autonomous system with precise control, robust state management, and reliable execution.
 
 ---
 
-## 2. Strategic Foundation
-
-### Game Analysis - "What should we accomplish?"
-Before writing any code, analyze what autonomous can achieve:
-
-**Key Questions:**
-- What bonus points are available only during autonomous?
-- How do autonomous points compare to teleop scoring rates?
-- What field positioning advantages exist?
-- How does autonomous performance affect tiebreakers?
-
-**Example Analysis (2023 Charged Up):**
-```
-Mobility: 3 points (auto only)
-Game pieces: 3-6 points depending on level  
-Balance: 8-12 points depending on robot count
-Tiebreaker: Auto points are 4th criteria (critical!)
-
-Theoretical maximum: ~27 points in 15 seconds
-Realistic target: 15-20 points consistently
-```
-
-### Time and Motion Study
-```java
-// Example timing breakdown for 2023
-// Preload score: 2.0 seconds
-// Drive to game piece: 3.5 seconds  
-// Intake game piece: 1.5 seconds
-// Return and score: 4.0 seconds
-// Drive to balance: 3.0 seconds
-// Balance: 1.0 seconds
-// Total: 15.0 seconds (fully utilized)
-```
-
-### Alliance Considerations - "Who are we playing with?"
-
-**Qualification Matches:**
-- Most alliance partners provide minimal coordination
-- Design routines that maximize your individual contribution
-- Avoid areas where conflicts are likely
-
-**Playoff Matches:**  
-- Playing with skilled, coordinated alliance partners
-- Design complementary routines (who does what?)
-- Enable multiple strategic options
-
----
-
-## 3. Architecture and Hardware Setup
+## 1. Architecture and Hardware Setup
 
 ### Robot Design for Autonomous Success
-Certain design choices significantly impact autonomous capability:
+Certain design choices significantly impact autonomous capability. Ensure you work with your mechanical and cad subunit of your team to work out the following:
 
 **Enabling Design Features:**
+
+Some mechanisms are required 
+
 ```java
 // Tank intake example - allows pickup while driving
 public class IntakeSubsystem extends SubsystemBase {
@@ -120,12 +31,15 @@ public class IntakeSubsystem extends SubsystemBase {
 ```
 
 **Vision-Friendly Camera Placement:**
+
+Vision supplemented pose estimation will ensure accurate robot movoments. Ensure:
+
 - Clear sight lines to AprilTags
-- Multiple cameras for redundancy  
+- Multiple cameras for redundancy. Place cameras at different corners or heights on the robot to maximize AprilTag visibility and minimize occlusion from mechanisms or game pieces.
 - Protected from game piece interference
 
 **Fast, Consistent Mechanisms:**
-- Minimize setup/transition times
+- Minimize/optimize areas of handoff and degrees of freedom
 - Repeatable positioning
 - Robust sensor feedback
 
@@ -149,7 +63,7 @@ public class DriveSubsystem extends SubsystemBase {
 
 ---
 
-## 4. Control System Implementation
+## 2. Control System Implementation
 
 ### Layer 1: Motor Control
 The foundation of autonomous control starts with precise motor control:
@@ -256,7 +170,7 @@ public class AutoDriveCommand extends CommandBase {
 
 ---
 
-## 5. Systematic Tuning Process
+## 3. Systematic Tuning Process
 
 ### Step 1: Motor Control Tuning
 Using visual feedback for optimal performance:
@@ -324,7 +238,7 @@ rotationController.setP(1.0);
 
 ---
 
-## 6. State Machine Implementation
+## 4. State Machine Implementation
 
 ### Robust Robot State Management
 ```java
@@ -401,7 +315,7 @@ public class SuperstructureSubsystem extends SubsystemBase {
 
 ---
 
-## 7. Autonomous Routine Scripting
+## 5. Autonomous Routine Scripting
 
 ### Command-Based Autonomous Structure (Inline Factory Implementation)
 
@@ -477,7 +391,7 @@ public Command getAutonomousCommand() {
 
 ---
 
-## 8. Testing and Validation
+## 6. Testing and Validation
 
 ### Layer-by-Layer Testing
 Test each system independently before integration:
@@ -543,7 +457,7 @@ public class AutonomousTest extends CommandBase {
 
 ---
 
-## 9. Essential Debugging Tips
+## 7. Essential Debugging Tips
 
 ### Comprehensive Telemetry
 ```java
@@ -602,7 +516,7 @@ public void periodic() {
 
 ---
 
-## 10. Advanced Techniques
+## 8. Advanced Techniques
 
 ### Dynamic Path Planning
 ```java
@@ -661,7 +575,7 @@ public class RobustIntakeCommand extends CommandBase {
 
 ---
 
-## 11. Practice Project
+## 9. Practice Project
 
 **Build this step-by-step:**
 
@@ -715,7 +629,7 @@ public class RobustIntakeCommand extends CommandBase {
 
 ---
 
-**🚀 Ready to dominate autonomous?** Work through the practice project systematically, then apply these concepts to create autonomous routines that give your team a significant competitive advantage!
+**🚀 Ready to implement autonomous?** Work through the practice project systematically, building each layer carefully and testing thoroughly at each step!
 
 **Remember:** "There's more to a good auto than fancy code." Focus on systematic implementation, thorough testing, and strategic thinking about what will actually help you win matches.
 
