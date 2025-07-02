@@ -199,4 +199,3 @@ public void updateOdometry() {
 
 ---
 
-*This guide is based on FRC programming best practices and includes implementation details for new programmers.*
