@@ -12,14 +12,13 @@ WPILib provides the `TimedRobot` base class to simplify handling robot periodic 
 
 ### The `TimedRobot` Class
 
-When you create a new robot project in VSCode with WPILib, the generated `Robot.java` will extend `TimedRobot`. This class includes several lifecycle methods that you can implement:
+When you create a new robot project in VSCode with WPILib, the generated `Robot.java` will extend `TimedRobot`. This class includes several lifecycle methods that you can implement based on a time loop:
 
-- `robotInit()`: Runs once when the robot code first starts. Use this to initialize sensors, motors, cameras, and other hardware.
-- `autonomousInit()`: Called once each time the robot enters Autonomous mode. Reset relevant timers, encoders, or state variables here.
-- `autonomousPeriodic()`: Called periodically (every 20ms by default) during Autonomous mode. Place autonomous routines and sensor checks here.
-- `teleopInit()`: Called once each time the robot enters Teleoperated (Teleop) mode. Prepare any state for driver control.
-- `teleopPeriodic()`: Called periodically during Teleop mode. Read joystick inputs, update motor outputs, and run control loops here.
-- `disabledInit()` and `disabledPeriodic()`: Called when the robot is disabled. Useful for stopping motors or updating dashboards safely.
+```java
+
+```
+
+
 
 ### Basic Project Structure
 
