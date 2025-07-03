@@ -65,8 +65,15 @@ public class DriveSubsystem extends SubsystemBase {
 
 ## 2. Control System Implementation
 
+Each of these layers ensure presice autonomous movement. It is organized this way to make it easier to understand how each component of our autonomous control system affects auto routines. Keep these software configurations in mind when writing/debugging autos. 
+
 ### Layer 1: Motor Control
 The foundation of autonomous control starts with precise motor control:
+Accurately profiled and tuned motors are crucial for autonomous systems because they ensure that the robot moves predictably and precisely according to the planned path. Here’s why this matters:
+- **Consistent Movement:** Properly tuned motors respond to commands in a repeatable way, ensuring the robot’s actions match the software’s expectations every time.
+- **Smooth Trajectories and Profiles:** Motion profiling (such as Motion Magic) enables smooth acceleration and deceleration, reducing mechanical stress on mechanisms and improving path accuracy to avoid collisions and reach percise locations.
+- **Error Reduction:** Well-tuned PID and feedforward values minimize overshoot, oscillation, and drift—crucial for following lines, stopping at targets, or interacting with game pieces.
+- **Battery Compensation:** Voltage compensation ensures consistent robot performance regardless of battery charge, preventing slowdowns or unpredictable behavior during a auto sequence. Differences in voltage can cause differing hard to reproduce behaviors with the robot.
 
 **TalonFX Voltage Compensation:**
 ```java
@@ -92,6 +99,8 @@ config.motionAcceleration = 6000;    // sensor units per 100ms per second
 ### Layer 2: Localization and Sensors
 
 **Wheel Odometry Calibration:**
+Wheel odometry estimates the robot’s position by tracking wheel rotations. If the wheel radius or encoder values are incorrect, even small errors quickly accumulate, causing the robot to drift off its intended path. Proper calibration ensures that distance measurements match real-world movement, which is essential for following trajectories and reaching field objectives precisely.
+
 ```java
 // Critical: Determine actual wheel radius on carpet
 public void calibrateWheelRadius() {
@@ -105,7 +114,17 @@ public void calibrateWheelRadius() {
 }
 ```
 
+
 **Vision System Integration:**
+> &nbsp;&nbsp;Vision systems (like **PhotonVision**) provide **absolute position updates** by detecting field targets.  
+> &nbsp;&nbsp;A well-tuned vision pipeline can:
+> - &nbsp;&nbsp;**Correct for odometry drift**
+> - &nbsp;&nbsp;**Handle changing lighting**
+> - &nbsp;&nbsp;**Filter out false positives**
+>
+> &nbsp;&nbsp;This allows the robot to **re-localize itself**, especially after collisions or wheel slip, maintaining accuracy throughout the autonomous period.
+For a deeper dive into vision system concepts, see [Vision System Explanation](../vision_explanation.md).
+
 ```java
 public class VisionSubsystem extends SubsystemBase {
     private final PhotonCamera camera;
@@ -171,6 +190,8 @@ public class AutoDriveCommand extends CommandBase {
 ---
 
 ## 3. Systematic Tuning Process
+
+Tune each layer sequentially to ensure a solid foundation—if earlier layers are not properly tuned, later layers will struggle to compensate, leading to unreliable autonomous performance.
 
 ### Step 1: Motor Control Tuning
 Using visual feedback for optimal performance:
@@ -368,24 +389,33 @@ public Command getThreePieceAuto(
 }
 ```
 
-### Path Planning Integration
+### Robot Container Integration
+
 ```java
-// Using PathPlanner for trajectory generation
-public static final HashMap<String, Command> eventMap = new HashMap<>();
+// In your RobotContainer class
+public class RobotContainer {
+    private final DriveSubsystem drive = new DriveSubsystem();
+    private final SuperstructureSubsystem superstructure = new SuperstructureSubsystem();
+    private final IntakeSubsystem intake = new IntakeSubsystem();
 
-static {
-    eventMap.put("startIntake", new StartIntake(intake));
-    eventMap.put("stopIntake", new StopIntake(intake));
-    eventMap.put("prepareScore", new PrepareScore(superstructure));
-}
+    // Inline SequentialCommandGroup factory for PathPlanner-based auto
+    public Command getPathPlannerAuto() {
+        return new SequentialCommandGroup(
+            new InstantCommand(() -> drive.resetOdometry()),
+            new ParallelCommandGroup(
+                new StartIntake(intake),
+                new PrepareScore(superstructure)
+            ),
+            // Follow the generated path using PathPlanner
+            AutoBuilder.followPath(
+                PathPlannerPath.fromPathFile("ThreePiecePath")
+            ),
+            new StopIntake(intake),
+            new ScoreHigh(superstructure)
+        );
+    }
 
-public Command getAutonomousCommand() {
-    return new SequentialCommandGroup(
-        new InstantCommand(() -> resetOdometry()),
-        AutoBuilder.followPath(
-            PathPlannerPath.fromPathFile("ThreePiecePath")
-        )
-    );
+    // Auto Factories -> See above for more info
 }
 ```
 
@@ -628,8 +658,6 @@ public class RobustIntakeCommand extends CommandBase {
 - [Alliance Coordination](https://www.chiefdelphi.com/c/technical/programming/12) - Multi-robot autonomous planning
 
 ---
-
-**🚀 Ready to implement autonomous?** Work through the practice project systematically, building each layer carefully and testing thoroughly at each step!
 
 **Remember:** "There's more to a good auto than fancy code." Focus on systematic implementation, thorough testing, and strategic thinking about what will actually help you win matches.
 
