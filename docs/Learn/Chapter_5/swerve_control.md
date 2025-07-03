@@ -56,7 +56,17 @@ The drive motor, steer motor, and encoder are usually team specific and require 
 
 ### Key Classes in WPILIB
 
+### Key Classes in WPILIB
+
 **ChassisSpeeds**
+
+The `ChassisSpeeds` class in relation to the swerve drive represents the desired movement of the robot as a whole. It encapsulates three components:
+- **xVelocity**: Forward/backward speed (meters per second)
+- **yVelocity**: Left/right speed (meters per second)
+- **omegaVelocity**: Rotational speed (radians per second)
+
+This class is commonly used as an input to swerve drive kinematics, which then calculates the necessary wheel speeds and angles for each module to achieve the desired chassis motion. By adjusting these values, you can command the robot to move in any direction and rotate simultaneously.
+
 ```java
 // Stores target velocities for the entire robot
 ChassisSpeeds chassisSpeeds = new ChassisSpeeds(
@@ -67,6 +77,21 @@ ChassisSpeeds chassisSpeeds = new ChassisSpeeds(
 ```
 
 **SwerveModuleState**
+
+Represents the state of an individual swerve drive module, encapsulating both its current angle (direction) and speed (velocity). By doing so, it enables coordinated control of all modules to achieve complex robot maneuvers such as strafing, rotating, and omnidirectional movement.
+
+```java
+// Stores angle and speed for individual modules
+SwerveModuleState moduleState = new SwerveModuleState(
+    speed,  // Speed in m/s
+    angle   // Angle as Rotation2d
+);
+```
+
+**SwerveModuleState**
+
+Represents the state of an individual swerve drive module, encapsulating both its current angle (direction) and speed (velocity). By doing so, it enables coordinated control of all modules to achieve complex robot maneuvers such as strafing, rotating, and omnidirectional movement.
+
 ```java
 // Stores angle and speed for individual modules
 SwerveModuleState moduleState = new SwerveModuleState(
@@ -81,7 +106,7 @@ SwerveModuleState moduleState = new SwerveModuleState(
 
 Swerve drive uses inverse kinematics to calculate individual module states from desired robot motion.
 
-<!-- Add picture of vector addition -->
+![Swerve Drive Vector Addition Diagram](../images/swerveVector.png)
 
 **Vector Addition Principle:**
 For each module, the final velocity vector is the sum of:
@@ -172,7 +197,9 @@ driveMotor.setVoltage(feedforward + feedback);
 
 ## 5. Coordinate Systems
 
-Understanding and adhering to the WPILIB coordinate system is crucial because it ensures consistent movement commands, sensor readings, and autonomous routines across all robot components. Teams have frequently run into switching alliance issues/direction confusion/unreliable feild control etc. due to misunderstanding the WPILIB coordinate system
+![WPILIB Swerve Coordinate System](../images/swerveCoord1.png)
+
+Understanding and adhering to the WPILIB coordinate system is crucial because it ensures consistent movement commands, sensor readings, and autonomous routines across the swerve drive. Teams have frequently run into switching alliance issues/direction confusion/unreliable feild control etc. due to misunderstanding the WPILIB coordinate system.
 
 ### WPILIB Coordinate System (NWU)
 
@@ -195,6 +222,11 @@ Understanding and adhering to the WPILIB coordinate system is crucial because it
 - Positive Y = toward left side of field
 
 **Red Alliance Adjustments:**
+
+Actions taken on the alliance side must be mirrored 
+
+ * [TIP] Do not mirror omega turns: Omega turns are specialized maneuvers and should not be mirrored, as this may lead to unintended behavior or incorrect movement patterns.
+
 ```java
 // Flip coordinates for red alliance in mirrored fields
 if (DriverStation.getAlliance().get() == DriverStation.Alliance.Red) {
@@ -214,7 +246,21 @@ public class SwerveDrive extends SubsystemBase {
     private final Gyro gyro;
     
     public SwerveDrive() {
-        // Initialize modules, kinematics, and gyro
+        ```java
+            // Initialize modules, kinematics, and gyro
+            modules = new SwerveModule[] {
+                new SwerveModule(1, 2, 11), // Front Left
+                new SwerveModule(3, 4, 12), // Front Right
+                new SwerveModule(5, 6, 13), // Back Left
+                new SwerveModule(7, 8, 14)  // Back Right
+            };
+
+            // Use constants for kinematics (see Kinematics Setup section)
+            kinematics = Constants.KINEMATICS;
+
+            // Instantiate a Pigeon2 gyro using CTRE's library
+            gyro = new Pigeon2(0); // 0 is the CAN ID, adjust as needed
+        ```
     }
     
     public void drive(ChassisSpeeds chassisSpeeds) {
