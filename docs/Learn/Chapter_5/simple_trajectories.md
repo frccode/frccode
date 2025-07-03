@@ -4,7 +4,7 @@
 
 Swerve trajectory combines the power of motion profiling with holonomic movement, letting your robot follow smooth, planned paths while rotating independently. Instead of jerky point-to-point movement, your robot will glide along curves with perfect timing and coordination.
 
-**What you'll build:** A robot that smoothly follows pre-planned paths with independent rotation control.
+**What you'll build:** A robot that smoothly follows pre-planned paths with independent rotation control. This will cover the underlying explanation behind trajectory planning and a simple implementation of trajectory planning and following from wpilib. 
 
 ---
 

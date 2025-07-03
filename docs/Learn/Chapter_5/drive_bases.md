@@ -16,10 +16,99 @@ This special wheel enables ominidrectional movement that includes strafing direc
 
 This guide will primarily focus on programming swerve drives and tank drives (also known as differential or West Coast drive). These systems are most commonly used in competition due to their versatility, performance, and prevalence in modern FRC games. The following chapters will provide detailed explanations, code examples, and best practices for implementing both swerve and tank drive systems in your robot code.
 
-Swerve Article <!-- Add swerve link-->
+## Key Concepts Across All Drivebases
+### Java Suppliers and FRC Usage
+
+A `Supplier<T>` in Java is a functional interface that represents a function with no arguments that returns a value of type `T`. Suppliers are commonly used for deferred or dynamic value retrieval, such as reading sensor data or getting the latest state of a subsystem.
+
+**FRC Example:**  
+In FRC robot code, Suppliers are often used to pass joystick or sensor values into commands or subsystems. For example, when creating a command to drive a robot, you might use `DoubleSupplier` (a primitive specialization of `Supplier<Double>`) to provide the latest joystick input each time the command runs:
+
+```java
+// Example: Passing joystick values as suppliers to a drive command
+DoubleSupplier forward = () -> driverController.getLeftY();
+DoubleSupplier turn = () -> driverController.getRightX();
+
+DriveCommand driveCommand = new DriveCommand(driveSubsystem, forward, turn);
+```
+
+This approach ensures the command always uses the most recent joystick values, making the robot responsive to operator input.
+
+### Organization of Drive Base Subsystems, Commands, and Command Calls in FRC
+
+In the FRC Command-Based framework, robot code is organized into subsystems and commands to promote modularity and clarity:
+
+#### 1. **Subsystems**
+A *subsystem* represents a physical part of the robot (e.g., the drive base). It contains methods to control hardware (motors, sensors) and maintains the state of that mechanism.
+
+```java
+public class DriveSubsystem extends SubsystemBase {
+    // Motor controllers and sensors declared here
+
+    public void drive(double forward, double turn) {
+        // Code to set motor outputs
+    }
+}
+```
+
+#### 2. **Commands**
+A *command* defines a specific robot action or behavior, often using one or more subsystems. For a drive base, a command might continuously read joystick values and call the drive method.
+
+```java
+public class DriveCommand extends CommandBase {
+    private final DriveSubsystem driveSubsystem;
+    private final DoubleSupplier forward, turn;
+
+    public DriveCommand(DriveSubsystem subsystem, DoubleSupplier forward, DoubleSupplier turn) {
+        this.driveSubsystem = subsystem;
+        this.forward = forward;
+        this.turn = turn;
+        addRequirements(subsystem);
+    }
+
+    @Override
+    public void execute() {
+        driveSubsystem.drive(forward.getAsDouble(), turn.getAsDouble());
+    }
+}
+```
+
+#### 3. **Command Calls (Binding)**
+Commands are scheduled or bound to triggers (like joystick buttons or default behaviors) in the `RobotContainer` class.
+
+```java
+driveSubsystem.setDefaultCommand(
+    new DriveCommand(driveSubsystem, 
+                     () -> driverController.getLeftY(), 
+                     () -> driverController.getRightX())
+);
+```
+
+#### **Diagram: Command-Based Structure for Drive Base**
+
+```mermaid
+graph TD
+    A[Driver Controller] -->|Supplies values| B[DriveCommand]
+    B -->|Calls| C[DriveSubsystem]
+    C -->|Controls| D[Motors/Sensors]
+```
+
+- **Driver Controller**: Provides input (joystick values).
+- **DriveCommand**: Reads input, calls drive methods.
+- **DriveSubsystem**: Implements hardware control.
+- **Motors/Sensors**: Physical hardware on the robot.
+
+This structure separates hardware logic from robot behavior, making code easier to maintain and extend.
 
 
-Tank Drive Article 
+## Where to go Next?
+
+
+[Swerve Control](./swerve_control.md)
+
+
+[Tank Drive Control](./differential_control.md) 
+
 
 
 ## Article
