@@ -43,7 +43,6 @@ plugins:
   #     width: 90%
   #     shadow: true
   - search
-  - include-markdown
   - group: # These plugins only run when the site is deployed
       enabled: !ENV CI
       plugins:
