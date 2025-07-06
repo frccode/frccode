@@ -1,8 +1,12 @@
-# Basic Control Theory
+# PID Control
+
+
+!!! warning
+    tycho - need some short paragraph explaining what "control theory" is and some basic terms before jumping straight into PID - this page is about PID and its implementation
 
 ## Overview
 
-This guide teaches you the basics to get your position/velocity based elevator/pivot/flywheel/extending tube  mechanisms moving accurately and covers why these systems work and are so wildly used.
+This guide teaches you the basics to get your position/velocity based elevator/pivot/flywheel/extending tube mechanisms moving accurately and covers why these systems work and are so wildly used.
 
 **What you'll build:** A position-controlled mechanism (arm, elevator, etc.) that smoothly moves to target positions.
 
@@ -10,38 +14,71 @@ This guide teaches you the basics to get your position/velocity based elevator/p
 
 ## 1. Why PID?
 
-For this senario, let's use an elevator and model its motion using different control methods.
+Let us consider an example. We have a robot, and we want to drive ten feet. We have encoders that tell us how many feet our robot has driven, and motors that we can send a percentage power to. How do we achieve our goal?
 
-**Manual Control?** This switches our controls method on and keeps in on indefinetely.
+!!! warning
+    tycho -  manual control needs to be differentiated from bangbang- its open loop, and shouldn't look at encoders
 
+### Manual Control
+One way to approach this problem is through a predetermined manual effort. Through trial and error, we may determine that we need to give the motors 50% power for one and a half seconds to reach our goal of 10 feet. 
+
+!!! warning
+    tycho - i feel like an interactive demo would do really well here to help build intuition with these different models. it's programming.. we should be able to do better. 
 ```java
-if (currentPosition < targetPosition) {
+while(time < 1.5) {
     motor.set(0.5); // Full speed regardless of position
 }
 ```
-This control method doesn't work for as it alwasy sets the same speed regardless of distance. In the case of our elevator, with a set speed it will keep rising past the distance you want it set too. Let's move to a new model.
+That's great! However, this method isn't adaptable to any variation. If we put a cone in front of the robot, it will be slowed down and go nine feet. If we remove a mechanism from the robot, it becomes lighter, and thus moves faster, and now goes 11 feet. 
 
-**Bang-bang control?** 
-This switches the our control method fully on or off depending on which side of the target you're on, solving our previous issue about the elevator "not knowing where to stop."
+If we want the robot to go 20 feet, we can't just double the time, because acceleration and velocity vary. It would require a whole new set of tests.
+
+### Bang-Bang Control
+Bang-bang tries to incorporate some sensor feedback by switching our control effort to on or off depending on which side of the target we're on.
+
+Imagine you're trying to boil a pot of water. You'd turn the stove on high heat to raise the temperature quickly, and then once it's boiling, you turn it off. In this scenario, Bang-Bang is _optimal!_
 
 ```java
-if (currentPosition < targetPosition) {
-    motor.set(1.0);  // Full speed forward
+if (currentPositionFt < 10) {
+    motor.set(1.0); // full speed
 } else {
-    motor.set(-1.0); // Full speed backward
+    motor.set(0); // stop
 }
 ```
 
-However, Bang-bang control leads to jerky, abrupt movements that make it difficult to stop precisely at the target. This lack of smoothness can also increase wear on mechanical parts over time.
+In our robot scenario, robot will keep pushing even if we try to slow it down until it reaches the target. But there is a fatal flaw with this design. Unlike in our boiling scenario, the robot carries _momentum_. This means that the robot will continue to move, even after we stop applying control effort, leading to what is known as _overshoot._
+
+Still, Bang-Bang is applicable in many scenarios where the mechanism variable doesn't have momentum (like a motor powering a flywheel), or if the mechanism has a tendency to return to its original state (like an elevator that has tendency to fall due to gravity). Mostly, Bang-Bang is implemented because its simple. In FRC however, we can do much better.
+
+<details>
+    <summary> ▶ What else is wrong with Bang-Bang? </summary>
+    While bang-bang control can be good for some mechanisms like flywheels, it leads to jerky, abrupt movements that make it difficult to stop precisely at the target, which can increase wear on mechanical parts over time.
+
+</details>
 
 
 
-**PID's Smart Solution** PID control is the foundation of precise robot movement. Instead of manually setting motor speeds, PID automatically adjusts power based on where you are versus where you want to be. 
+### PID's Smart Solution
 
-- **Far from target:** Move fast
-- **Close to target:** Move slow  
-- **At target:** Stop precisely
-- **Overshot:** Correct automatically
+We can be a lot smarter with our control. Let's say for the sake of understanding that you're driving a car, and you want this car to move exactly 100 feet. How would you achieve that?
+
+!!! warning
+    it would be much more engaging if we had some kind of javascript demo where users could "drive" a car 100 ft and we plot the control effort
+
+If you're trying to go fast, then the first thing you would do is step on the gas, slowly releasing it as you got up to speed. Then as you neared the target, you would use the brake.
+
+So what does PID do? PID control is the foundation of precise robot movement. Instead of manually setting motor speeds, PID automatically adjusts power based on _where you are_ versus _where you want to be_. This is also known as _error_.
+
+!!! warning
+    tycho - i think its better to frame this not as "move fast" or "move slow" but rather a push- since we dont have control over how fast the motor moves directly, particularly in a velocity-control setting. (however, this is nuanced, as we don't really have direct control over how hard it pushes either... ka.. kv.. )
+
+    edited until here
+
+
+- **Far from target:** Push hard
+- **Close to target:** Slow down
+- **At target:** Don't push
+- **Overshoot:** Push back
 
 **Real Benefits**
 - Consistent, repeatable positioning
