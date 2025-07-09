@@ -1,5 +1,5 @@
 site_name: FRCCode.org
-site:url: https://frccode.github.io
+site_url: https://frccode.github.io
 repo_url: https://github.com/frccode/frccode
 repo_name: frccode/frccode
 theme:
@@ -18,7 +18,6 @@ markdown_extensions:
     - attr_list
     - md_in_html
     - def_list
-    - md_in_html
     - admonition
     - pymdownx.details
     - pymdownx.superfences
@@ -29,8 +28,48 @@ markdown_extensions:
     - pymdownx.tabbed:
           alternate_style: true
     - pymdownx.emoji:
-          emoji_index: !!python/name:material.extensions.emoji.twemoji
-          emoji_generator: !!python/name:material.extensions.emoji.to_svg
+    - footnotes
+    - toc:
+        permalink: true
+    - pymdownx.arithmatex:
+        generic: true
+    - pymdownx.betterem:
+        smart_enable: all
+    - pymdownx.caret
+    - pymdownx.details
+    - pymdownx.highlight:
+        anchor_linenums: true
+    - pymdownx.inlinehilite
+    - pymdownx.keys
+    - pymdownx.magiclink:
+        repo_url_shorthand: true
+        user: your-team
+        repo: frccode
+    - pymdownx.mark
+    - pymdownx.smartsymbols
+    - pymdownx.superfences:
+        custom_fences:
+          - name: mermaid
+            class: mermaid
+            format: !!python/name:pymdownx.superfences.fence_code_format
+    - pymdownx.tabbed:
+        alternate_style: true
+    - pymdownx.tasklist:
+        custom_checkbox: true
+    - pymdownx.tilde
+
+extra_css:
+  - https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/codemirror.min.css
+  - https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/theme/material.min.css
+  - css/pid-simulator.css
+
+extra_javascript:
+  - https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/codemirror.min.js
+  - https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/clike/clike.min.js
+  - js/pid-simulator.js
+
+
+
 plugins:
 #  - social:
 #      enabled: true               # turns it on
@@ -58,6 +97,9 @@ plugins:
 #            cards_layout_dir: layouts
 #            cards_layout: default_page
 #            debug: false
+  - search
+  - minify:
+      minify_html: true
 extra:
   analytics:
     feedback:

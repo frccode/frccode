@@ -4,6 +4,11 @@
 !!! warning
     tycho - need some short paragraph explaining what "control theory" is and some basic terms before jumping straight into PID - this page is about PID and its implementation
 
+    Control theory is the study of how to make systems behave in a desired way by automatically adjusting their inputs based on feedback. As described in the CERN lecture notes, "Control theory deals with the problem of manipulating the inputs to a system to obtain the desired effect on the output of the system." In robotics, this means using sensors to measure what the robot is doing and then adjusting motors or actuators to reach a goal. Key terms include "system" (the thing being controlled), "input" (what you can change), "output" (what you want to achieve), and "feedback" (information about the current state). Control theory provides the mathematical and practical foundation for techniques like PID control, which is widely used in robotics and automation.
+
+
+[Reference material: CERN lecture notes on control theory (PDF)](https://cds.cern.ch/record/1100534/files/p73.pdf)
+
 ## Overview
 
 This guide teaches you the basics to get your position/velocity based elevator/pivot/flywheel/extending tube mechanisms moving accurately and covers why these systems work and are so wildly used.
@@ -62,10 +67,51 @@ Still, Bang-Bang is applicable in many scenarios where the mechanism variable do
 
 We can be a lot smarter with our control. Let's say for the sake of understanding that you're driving a car, and you want this car to move exactly 100 feet. How would you achieve that?
 
+<div class="pid-simulator" id="distance-control-sim">
+  <div class="header">
+    FRC Distance Control Simulator - Navigate to Target (50m away)
+  </div>
+  <div class="content">
+    <div class="controls">
+      <button class="reset-btn" onclick="resetDistanceControlSim()">Reset</button>
+      <div class="manual-controls">
+        <button onclick="manualDistanceControl(-1.0)">◀ Backward</button>
+        <button onclick="manualDistanceControl(0)">⏸ Pause</button>
+        <button onclick="manualDistanceControl(1.0)">▶ Forward</button>
+      </div>
+    </div>
+    <div class="field-display" id="distance-field-display">
+      <div class="field-markers">
+        <div class="distance-marker" style="left: 0%;">0m</div>
+        <div class="distance-marker" style="left: 20%;">10m</div>
+        <div class="distance-marker" style="left: 40%;">20m</div>
+        <div class="distance-marker" style="left: 60%;">30m</div>
+        <div class="distance-marker" style="left: 80%;">40m</div>
+        <div class="distance-marker" style="left: 95%;">50m</div>
+      </div>
+      <div class="distance-line"></div>
+      <div class="robot-block" id="distance-robot">🤖</div>
+      <div class="target" id="distance-target">🎯</div>
+      <div class="status-display" id="distance-status-display">
+        Position: 0.0m<br>
+        Distance to Target: 50.0m<br>
+        Speed: 0.0<br>
+        Status: Stopped
+      </div>
+      <div class="success-message" id="distance-success-message">
+        🎉 TARGET REACHED! 🎉<br>
+        Well done!
+      </div>
+    </div>
+  </div>
+</div>
+
 !!! warning
     it would be much more engaging if we had some kind of javascript demo where users could "drive" a car 100 ft and we plot the control effort
 
-If you're trying to go fast, then the first thing you would do is step on the gas, slowly releasing it as you got up to speed. Then as you neared the target, you would use the brake.
+
+
+To reach your target quickly for our Car Senario, you’d start by applying full power, then ease off as you get closer, and finally brake to stop exactly at the target. For a motor, this means starting at max power, gradually reducing it as you approach, and stopping when you reach the goal.
 
 So what does PID do? PID control is the foundation of precise robot movement. Instead of manually setting motor speeds, PID automatically adjusts power based on _where you are_ versus _where you want to be_. This is also known as _error_.
 
@@ -339,7 +385,9 @@ if (holdingGamePiece) {
 
 ## Where to Go Next
 
-**Ready for advanced control? Explore these:**
+With the basics of pid in mind, These links will take you to other resources that 
+
+**Explore these:**
 
 **🎯 Advanced PID Features**
 - [WPILib PID Controller](https://docs.wpilib.org/en/stable/docs/software/advanced-controls/controllers/pidcontroller.html) - Complete API reference
