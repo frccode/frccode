@@ -2,36 +2,39 @@
 
 ## Overview
 
-Vision processing turns your robot's camera into smart eyes that can recognize targets, track game pieces, and navigate autonomously. Instead of relying solely on sensors, your robot can "see" and react to the field like a human driver - but with perfect consistency.
+Vision processing turns your robot's camera into smart eyes that can recognize targets, track game pieces, and navigate autonomously. Instead of relying solely on sensors, your robot can "see" and react to the field like a human driver.
 
-**What you'll build:** A robot that can detect and track targets using computer vision for autonomous aiming and navigation.
+Since the introduction of vision assisted programming into FRC, there has been a spike in robot capabilities and the speed at which they can perform tasks. By givng your robot eyes and your code an extra data input, it played a key role in drammatically changing uping the playing field programmers were on when it comes to fast, competative, robotics. 
 
-**Next steps:** Advanced AprilTag tracking, neural networks, and real-time target recognition using [PhotonVision](https://docs.photonvision.org/) and [LimelightLib](https://docs.limelightvision.io/).
+**What you'll build:** 
+A robot that can detect and track targets using computer vision for autonomous aiming and navigation.
 
----
 
 ## 1. Why Vision Processing?
 
 ### The Power of Robot Vision
 **Manual Targeting vs Vision:**
+
+Here's a simple code example of how vision can automate driver control for faster, more reliable scoring/loading tasks.
+
 ```java
 // Manual: Driver aims manually
-shooterSubsystem.setAngle(driverEstimatedAngle);
+shooterSubsystem.setAngle(xboxAux.getLeftY());
 
 // Vision: Robot automatically finds and tracks target
 double targetAngle = vision.getTargetAngle();
 shooterSubsystem.setAngle(targetAngle);
 ```
 
-**Real Benefits:**
+**Example Benefits:**
 - **Autonomous scoring** - Perfect aim every time
 - **Driver assistance** - Help human pilots during teleop
 - **Game piece detection** - Find balls, cones, cubes automatically
 - **Navigation aids** - Use field landmarks for positioning
 - **Consistent performance** - No human error in targeting
 
-**FRC Applications:**
-- Auto-aiming for shooters
+**Example Applications:**
+- Auto-aiming for shooters 
 - Autonomous ball collection
 - Precise docking/charging
 - Field-relative navigation
@@ -41,176 +44,42 @@ shooterSubsystem.setAngle(targetAngle);
 
 ## 2. Vision Processing Pipeline
 
+This is a oversimplified model of how general vision(apriltags, relflective tape, objects) are process and turned into data that programmers can use.
+
 ### The Step-by-Step Process
 
-**1. Image Capture**
+**1. Image Capture**: The image is captured through a usb camera. Team's have varying preferences for framerates, resolution, exposure, etc. when it comes to selecting their camera based on what it's needed for. 
+>**Note:** As a simple example of differing specs for differing purposes, in apriltag processing, teams prefer to look at black and white cameras to process the black and white apirltags while in object detection, teams look for color cameras that can detect color objects. 
+
 ```
 Camera → Raw Image Frame (640x480 pixels, 30 FPS)
 ```
 
-**2. Preprocessing** 
+
+**2. Preprocessing**: The image is then taken through a series of steps that "color grade" the image so the internal vision pipline can identify known artifiacts.
 ```
 Raw Image → Color Space Conversion → Filtered Image
 ```
 
-**3. Target Detection**
+**3. Target Detection**: The vision artifacts are identified by the vision pipline and translated into variables used in code.
 ```
 Filtered Image → Contour Detection → Target Candidates
 ```
+>**Note:** Preprocessing and target detection are often performed on a coprocessor such as an Orange Pi or Raspberry Pi. These devices are used to offload computationally intensive tasks from the main system, enabling real-time image analysis and efficient resource utilization in embedded vision applications.
 
-**4. Target Analysis**
+**4. Target Analysis, Calculation, and Robot Action** This is the point where the user takes the resulting data and applies it to their robot logic.
 ```
 Candidates → Filtering → Distance/Angle Calculations
-```
-
-**5. Robot Action**
-```
 Target Data → Robot Code → Motor Commands
 ```
 
-### Basic Vision Workflow
-```java
-// Simplified pipeline
-while (robot.isEnabled()) {
-    // 1. Capture frame
-    Mat frame = camera.getFrame();
-    
-    // 2. Filter for target color (e.g., green retroreflective tape)
-    Mat filtered = filterForGreen(frame);
-    
-    // 3. Find contours (shapes)
-    List<Contour> contours = findContours(filtered);
-    
-    // 4. Filter for target-shaped contours
-    List<Target> targets = filterTargets(contours);
-    
-    // 5. Use best target for robot control
-    if (!targets.isEmpty()) {
-        Target best = getBestTarget(targets);
-        double angle = calculateAngle(best);
-        robotCode.setTargetAngle(angle);
-    }
-}
-```
-
 ---
 
-## 3. Vision Architecture Options
+## 3. Basic Vision Pipeline Implementation
 
-### Option 1: RoboRIO Vision (Simplest)
-**Setup:** Camera → RoboRIO → Robot Code
+## 3. Basic Vision Pipeline Implementation
 
-```java
-public class VisionSubsystem extends SubsystemBase {
-    private final UsbCamera camera;
-    private final CvSink cvSink;
-    private final Mat frame = new Mat();
-    
-    public VisionSubsystem() {
-        // Camera setup on roboRIO
-        camera = CameraServer.startAutomaticCapture();
-        camera.setResolution(320, 240);  // Lower resolution for performance
-        camera.setFPS(15);               // Lower FPS for roboRIO
-        
-        cvSink = CameraServer.getVideo();
-    }
-    
-    @Override
-    public void periodic() {
-        // Grab frame (non-blocking)
-        if (cvSink.grabFrame(frame) == 0) {
-            return; // No new frame
-        }
-        
-        // Process frame
-        processFrame(frame);
-    }
-    
-    private void processFrame(Mat frame) {
-        // Your vision pipeline here
-        List<Target> targets = visionPipeline.process(frame);
-        
-        // Send results to robot
-        if (!targets.isEmpty()) {
-            SmartDashboard.putNumber("Target Angle", targets.get(0).angle);
-        }
-    }
-}
-```
-
-**Pros:** Simple, everything in one place
-**Cons:** Limited processing power, can slow robot code
-
-### Option 2: Coprocessor Vision (Recommended)
-**Setup:** Camera → Raspberry Pi/Jetson → NetworkTables → RoboRIO
-
-```python
-# Python vision code on Raspberry Pi
-import cv2
-import numpy as np
-from networktables import NetworkTables
-
-# Initialize NetworkTables
-NetworkTables.initialize(server='10.TE.AM.2')  # Your robot IP
-vision_table = NetworkTables.getTable('vision')
-
-# Camera setup
-camera = cv2.VideoCapture(0)
-camera.set(cv2.CAP_PROP_FRAME_WIDTH, 640)
-camera.set(cv2.CAP_PROP_FRAME_HEIGHT, 480)
-
-while True:
-    ret, frame = camera.read()
-    if not ret:
-        continue
-    
-    # Vision pipeline
-    targets = process_frame(frame)
-    
-    # Send to robot
-    if targets:
-        best_target = targets[0]
-        vision_table.putNumber('target_angle', best_target.angle)
-        vision_table.putNumber('target_distance', best_target.distance)
-        vision_table.putBoolean('target_found', True)
-    else:
-        vision_table.putBoolean('target_found', False)
-```
-
-```java
-// Robot code receives vision data
-public class ShooterSubsystem extends SubsystemBase {
-    private final NetworkTableEntry targetAngle;
-    private final NetworkTableEntry targetFound;
-    
-    public ShooterSubsystem() {
-        NetworkTable visionTable = NetworkTableInstance.getDefault().getTable("vision");
-        targetAngle = visionTable.getEntry("target_angle");
-        targetFound = visionTable.getEntry("target_found");
-    }
-    
-    public boolean hasTarget() {
-        return targetFound.getBoolean(false);
-    }
-    
-    public double getTargetAngle() {
-        return targetAngle.getDouble(0.0);
-    }
-}
-```
-
-**Pros:** Fast processing, doesn't slow robot code
-**Cons:** More complex setup, additional hardware
-
-### Option 3: Driver Station Vision
-**Setup:** Camera → RoboRIO → Driver Station → NetworkTables → Robot
-
-**Pros:** Powerful laptop processing
-**Cons:** High latency, bandwidth limitations
-
----
-
-## 4. Basic Vision Pipeline Implementation
+Below is a simplified Java vision pipeline using OpenCV, similar to what many FRC teams use for retroreflective tape detection. This example covers color filtering, contour detection, and target filtering.
 
 ### Step 1: Color Filtering
 ```java
@@ -218,22 +87,22 @@ public class VisionPipeline {
     // HSV ranges for green retroreflective tape
     private final Scalar lowerGreen = new Scalar(40, 50, 50);
     private final Scalar upperGreen = new Scalar(80, 255, 255);
-    
+
     public Mat filterForTarget(Mat input) {
         Mat hsv = new Mat();
         Mat mask = new Mat();
-        
+
         // Convert to HSV color space
         Imgproc.cvtColor(input, hsv, Imgproc.COLOR_BGR2HSV);
-        
+
         // Filter for green color
         Core.inRange(hsv, lowerGreen, upperGreen, mask);
-        
+
         // Clean up noise
         Mat kernel = Imgproc.getStructuringElement(Imgproc.MORPH_RECT, new Size(3, 3));
         Imgproc.morphologyEx(mask, mask, Imgproc.MORPH_OPEN, kernel);
         Imgproc.morphologyEx(mask, mask, Imgproc.MORPH_CLOSE, kernel);
-        
+
         return mask;
     }
 }
@@ -244,11 +113,11 @@ public class VisionPipeline {
 public List<MatOfPoint> findContours(Mat mask) {
     List<MatOfPoint> contours = new ArrayList<>();
     Mat hierarchy = new Mat();
-    
+
     // Find contours
-    Imgproc.findContours(mask, contours, hierarchy, 
+    Imgproc.findContours(mask, contours, hierarchy,
                         Imgproc.RETR_EXTERNAL, Imgproc.CHAIN_APPROX_SIMPLE);
-    
+
     return contours;
 }
 ```
@@ -265,39 +134,44 @@ public class Target {
 
 public List<Target> filterTargets(List<MatOfPoint> contours) {
     List<Target> targets = new ArrayList<>();
-    
+
     for (MatOfPoint contour : contours) {
         double area = Imgproc.contourArea(contour);
-        
+
         // Filter by size
         if (area < 100 || area > 10000) {
             continue;
         }
-        
+
         // Get bounding rectangle
         Rect boundingRect = Imgproc.boundingRect(contour);
         double aspectRatio = (double) boundingRect.width / boundingRect.height;
-        
+
         // Filter by aspect ratio (targets are typically wider than tall)
         if (aspectRatio < 1.2 || aspectRatio > 3.0) {
             continue;
         }
-        
+
         // Create target object
         Target target = new Target();
         target.centerX = boundingRect.x + boundingRect.width / 2.0;
         target.centerY = boundingRect.y + boundingRect.height / 2.0;
         target.area = area;
-        
+
         targets.add(target);
     }
-    
+
     // Sort by area (biggest first)
     targets.sort((a, b) -> Double.compare(b.area, a.area));
-    
+
     return targets;
 }
 ```
+
+---
+
+For a full working example and more advanced features, see the [PhotonVision FRC vision processing repository](https://github.com/PhotonVision/photonvision).
+
 
 ### Step 4: Angle and Distance Calculation
 ```java
@@ -430,7 +304,7 @@ def detect_game_pieces(frame):
 
 ---
 
-## 7. Performance Optimization
+## 5. Performance Optimization
 
 ### Camera Settings
 ```java
@@ -469,7 +343,7 @@ public Mat getROI(Mat frame) {
 
 ---
 
-## 8. Debugging and Tuning
+## 6. Debugging and Tuning
 
 ### Essential Telemetry
 ```java
@@ -497,6 +371,8 @@ public void periodic() {
 
 ### Common Issues & Solutions
 
+These are common problems with suggested solutions. However, these are not "one size fits all"
+
 **Problem:** No targets detected
 - **Solution:** Check color ranges, lighting conditions, camera exposure
 
@@ -507,7 +383,7 @@ public void periodic() {
 - **Solution:** Add target tracking/prediction, improve filtering
 
 **Problem:** Poor performance/lag
-- **Solution:** Lower resolution/FPS, optimize pipeline, use coprocessor
+- **Solution:** Lower resolution/FPS, use coprocessor
 
 **Problem:** Inaccurate distance measurements
 - **Solution:** Calibrate camera, use stereo vision, add known target size
@@ -535,26 +411,9 @@ public void periodic() {
 
 ## Where to Go Next
 
-**Ready for professional vision? Explore these:**
+For a deeper dive into AprilTag detection and usage, see the [AprilTag Processing Getting Started](https://docs.wpilib.org/en/stable/docs/software/vision-processing/apriltag/index.html).
 
-**🎯 Pre-Built Solutions**
-- [PhotonVision](https://docs.photonvision.org/) - Complete vision processing suite
-- [LimelightLib](https://docs.limelightvision.io/) - Plug-and-play vision computer
-- [Chameleon Vision](https://chameleon-vision.readthedocs.io/) - Open-source vision processing
 
-**🔧 Advanced Techniques**
-- [Camera Calibration](https://docs.opencv.org/4.x/dc/dbb/tutorial_py_calibration.html) - Accurate 3D positioning
-- [Pose Estimation](https://docs.wpilib.org/en/stable/docs/software/vision-processing/apriltag/apriltag-intro.html) - 6DOF target tracking
-- [Machine Learning](https://www.tensorflow.org/) - Neural network object detection
-
-**📊 Multi-Camera Systems**
-- [Stereo Vision](https://docs.opencv.org/4.x/dd/d53/tutorial_py_depthmap.html) - Depth perception
-- [360° Coverage](https://docs.photonvision.org/en/latest/docs/programming/photonlib/getting-target-data.html) - Multiple camera coordination
-
-**⚡ Real-Time Performance**
-- [GPU Acceleration](https://opencv.org/platforms/cuda/) - CUDA-accelerated processing
-- [FPGA Vision](https://www.ni.com/en-us/shop/labview/add-ons/third-party/ni-vision-for-labview.html) - Ultra-low latency processing
 
 ---
 
-**🚀 Ready to give your robot eyes?** Start with basic color detection, master the fundamentals, then explore professional vision solutions for competition-winning autonomous performance!
