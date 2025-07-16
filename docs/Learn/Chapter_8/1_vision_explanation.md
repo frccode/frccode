@@ -6,6 +6,10 @@ Vision processing turns your robot's camera into smart eyes that can recognize t
 
 Since the introduction of vision assisted programming into FRC, there has been a spike in robot capabilities and the speed at which they can perform tasks. By givng your robot eyes and your code an extra data input, it played a key role in drammatically changing uping the playing field programmers were on when it comes to fast, competative, robotics. 
 
+> **Note:** Much of this documentation/examples is based off [PhotonVision](https://docs.photonvision.org/en/latest/docs/description.html) and [WPILib Vision Processing](https://docs.wpilib.org/en/stable/docs/software/vision-processing/index.html) documentation that provides a more in depth explanation on the topics cover in this section. This section is meant to get users started on a simple vision program for those without any previous knowledge. However, it is recommended to check out these documentations for a more in depth understanding of vision systems.
+
+
+
 **What you'll build:** 
 A robot that can detect and track targets using computer vision for autonomous aiming and navigation.
 
@@ -46,6 +50,9 @@ shooterSubsystem.setAngle(targetAngle);
 
 This is a oversimplified model of how general vision(apriltags, relflective tape, objects) are process and turned into data that programmers can use.
 
+A **vision pipeline** is a sequence of image processing steps that transforms raw camera input into useful data for your robot code. Each pipeline is designed to detect specific features—such as colors, shapes, or fiducial markers (like AprilTags)—and extract measurements like position, angle, or distance.
+[[PhotonVision documentation on pipelines](https://docs.photonvision.org/en/latest/docs/pipelines/about-pipelines.html#what-is-a-pipeline)].
+
 ### The Step-by-Step Process
 
 **1. Image Capture**: The image is captured through a usb camera. Team's have varying preferences for framerates, resolution, exposure, etc. when it comes to selecting their camera based on what it's needed for. 
@@ -74,8 +81,6 @@ Target Data → Robot Code → Motor Commands
 ```
 
 ---
-
-## 3. Basic Vision Pipeline Implementation
 
 ## 3. Basic Vision Pipeline Implementation
 
