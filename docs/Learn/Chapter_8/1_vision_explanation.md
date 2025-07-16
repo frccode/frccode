@@ -4,7 +4,7 @@
 
 Vision processing turns your robot's camera into smart eyes that can recognize targets, track game pieces, and navigate autonomously. Instead of relying solely on sensors, your robot can "see" and react to the field like a human driver.
 
-Since the introduction of vision assisted programming into FRC, there has been a spike in robot capabilities and the speed at which they can perform tasks. By givng your robot eyes and your code an extra data input, it played a key role in drammatically changing uping the playing field programmers were on when it comes to fast, competative, robotics. 
+Since the introduction of vision assisted programming into FRC, there has been a spike in robot capabilities and the speed at which they can perform tasks. By givng the code an extra data input, it played a key role in drammatically changing uping the playing field programmers were on when it comes to fast, competative, robotics. 
 
 > **Note:** Much of this documentation/examples is based off [PhotonVision](https://docs.photonvision.org/en/latest/docs/description.html) and [WPILib Vision Processing](https://docs.wpilib.org/en/stable/docs/software/vision-processing/index.html) documentation that provides a more in depth explanation on the topics cover in this section. This section is meant to get users started on a simple vision program for those without any previous knowledge. However, it is recommended to check out these documentations for a more in depth understanding of vision systems.
 
@@ -56,7 +56,7 @@ A **vision pipeline** is a sequence of image processing steps that transforms ra
 ### The Step-by-Step Process
 
 **1. Image Capture**: The image is captured through a usb camera. Team's have varying preferences for framerates, resolution, exposure, etc. when it comes to selecting their camera based on what it's needed for. 
->**Note:** As a simple example of differing specs for differing purposes, in apriltag processing, teams prefer to look at black and white cameras to process the black and white apirltags while in object detection, teams look for color cameras that can detect color objects. 
+>**Note:** As a simple example of differing specs for differing purposes, in apriltag processing, teams prefer to look at black and white cameras to process the black and white apirltags, while in object detection, teams look for color cameras that can detect color objects. 
 
 ```
 Camera → Raw Image Frame (640x480 pixels, 30 FPS)
@@ -84,7 +84,7 @@ Target Data → Robot Code → Motor Commands
 
 ## 3. Basic Vision Pipeline Implementation
 
-Below is a simplified Java vision pipeline using OpenCV, similar to what many FRC teams use for retroreflective tape detection. This example covers color filtering, contour detection, and target filtering.
+To provide an example to what was being talked about above, below is a simplified Java vision pipeline using OpenCV, similar to what many FRC teams use for retroreflective tape detection. This example covers color filtering, contour detection, and target filtering.
 
 ### Step 1: Color Filtering
 ```java
@@ -200,6 +200,8 @@ public void calculateTargetInfo(Target target, int imageWidth, int imageHeight) 
 
 ## 5. Integration with Robot Code
 
+These are some code sinpets that show how the data being collected from Vision is being applied to FRC:
+
 ### Auto-Aiming Shooter
 ```java
 public class AutoAimCommand extends CommandBase {
@@ -261,9 +263,8 @@ public class DriveWithVisionAssist extends CommandBase {
 
 ---
 
-## 6. Real-World Examples
-
 ### AprilTag Detection (Simple)
+
 ```java
 // Using WPILib's AprilTag detector
 AprilTagDetector detector = new AprilTagDetector();
@@ -311,13 +312,15 @@ def detect_game_pieces(frame):
 
 ## 5. Performance Optimization
 
+Below are some ways to boost performance for your vision system. Keep in mind, vision is typically a battle between higher quality imaging vs speed of performance. The settings listed below are set differently depending on the vision setup you are using, but the general settings are mostly consistent across vendors.
+
 ### Camera Settings
 ```java
-// Optimize for performance
-camera.setResolution(320, 240);  // Lower resolution = faster processing
-camera.setFPS(15);               // 15 FPS often sufficient
-camera.setExposure(0);           // Auto exposure off for consistent lighting
-camera.setBrightness(30);        // Adjust for your field conditions
+// Optimize for performance and image quality tradeoffs
+camera.setResolution(320, 240);  // Lower resolution = faster processing, but less detail (may miss small/remote targets)
+camera.setFPS(15);               // higher FPS is smoother but uses more CPU, lower FPS may miss fast motion
+camera.setExposure(0);           // Auto exposure off for consistent lighting; manual exposure prevents flicker but may under/overexpose in changing light
+camera.setBrightness(30);        // Adjust for your field conditions; too low = dark image, too high = washed out, affects detection accuracy
 ```
 
 ### Processing Optimizations
@@ -328,7 +331,7 @@ private int frameCount = 0;
 @Override
 public void periodic() {
     frameCount++;
-    if (frameCount % 2 == 0) {  // Process every other frame
+    if (frameCount % 2 == 0) {  // Process every other frame (doubles speed, but may miss quick changes)
         processFrame();
     }
 }
@@ -336,6 +339,7 @@ public void periodic() {
 // Region of Interest (ROI) processing
 public Mat getROI(Mat frame) {
     // Only process center portion where targets likely appear
+    // Improves speed, but ignores targets outside ROI (may miss off-center objects)
     int x = frame.width() / 4;
     int y = frame.height() / 4;
     int width = frame.width() / 2;
@@ -350,7 +354,8 @@ public Mat getROI(Mat frame) {
 
 ## 6. Debugging and Tuning
 
-### Essential Telemetry
+### Telemetry Example
+
 ```java
 @Override
 public void periodic() {
@@ -416,7 +421,7 @@ These are common problems with suggested solutions. However, these are not "one 
 
 ## Where to Go Next
 
-For a deeper dive into AprilTag detection and usage, see the [AprilTag Processing Getting Started](https://docs.wpilib.org/en/stable/docs/software/vision-processing/apriltag/index.html).
+ For the next part of this seciton, see AprilTag detection and usage: [AprilTag Processing Getting Started](https://docs.wpilib.org/en/stable/docs/software/vision-processing/apriltag/index.html).
 
 
 
