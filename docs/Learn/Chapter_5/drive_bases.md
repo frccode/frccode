@@ -104,7 +104,6 @@ This structure separates hardware logic from robot behavior, making code easier 
 
 Below is an interactive simulator showing the difference between drivebases.
 
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
