@@ -100,9 +100,14 @@ graph TD
 
 This structure separates hardware logic from robot behavior, making code easier to maintain and extend.
 
+## Simulator
+
+Below is an interactive simulator showing the difference between drivebases.
+
 
 ## Where to go Next?
 
+Choose the following section based off the drivebase you plan to program:
 
 [Swerve Control](./swerve_control.md)
 
@@ -112,5 +117,5 @@ This structure separates hardware logic from robot behavior, making code easier 
 
 
 ## Article
-Go through the following link:
+For more information on drive bases. Please check out:
 > https://docs.revrobotics.com/frc-kickoff-concepts/2023/drivetrains
