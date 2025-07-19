@@ -105,6 +105,90 @@ This structure separates hardware logic from robot behavior, making code easier 
 Below is an interactive simulator showing the difference between drivebases.
 
 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FRC Drive Base Simulator</title>
+    <link rel="stylesheet" href="simulator.css">
+</head>
+<body>
+    <div class="simulator-container">
+        <h1 class="title">🤖 FRC Drive Base Simulator</h1>
+        <div class="controls-section">
+            <div class="control-panel">
+                <div class="control-group">
+                    <h3>Drive Type Selection</h3>
+                    <div class="drive-type-selector">
+                        <button class="drive-type-btn active" onclick="setDriveType('tank')">Tank Drive</button>
+                        <button class="drive-type-btn" onclick="setDriveType('swerve')">Swerve Drive</button>
+                    </div>
+                </div>
+                <div class="input-display">
+                    <div class="input-group">
+                        <h4>Drive Inputs</h4>
+                        <div class="input-label">Forward/Backward</div>
+                        <div class="input-bar">
+                            <div class="input-bar-fill" id="forwardBar"></div>
+                        </div>
+                        <div class="input-label">Left/Right Turn</div>
+                        <div class="input-bar">
+                            <div class="input-bar-fill" id="turnBar"></div>
+                        </div>
+                    </div>
+                    <div class="input-group" id="swerveInputs" style="display: none;">
+                        <h4>Swerve Inputs</h4>
+                        <div class="input-label">Strafe (Left/Right)</div>
+                        <div class="input-bar">
+                            <div class="input-bar-fill" id="strafeBar"></div>
+                        </div>
+                        <div class="input-label">Rotation</div>
+                        <div class="input-bar">
+                            <div class="input-bar-fill" id="rotationBar"></div>
+                        </div>
+                    </div>
+                </div>
+                <button class="reset-btn" onclick="resetRobot()">🔄 Reset Position</button>
+            </div>
+        </div>
+        <div class="field-container">
+            <canvas id="gameField" width="800" height="400"></canvas>
+            <div class="robot-info">
+                <div class="telemetry" id="telemetry">
+                    <div>X: <span id="posX">0.0</span>m</div>
+                    <div>Y: <span id="posY">0.0</span>m</div>
+                    <div>Angle: <span id="angle">0.0</span>°</div>
+                    <div>Speed: <span id="speed">0.0</span>m/s</div>
+                </div>
+            </div>
+        </div>
+        <div class="instructions">
+            <h3>🎮 Controls</h3>
+            <p><strong>Movement:</strong></p>
+            <div class="key-group">
+                <span class="key">W</span><span class="key">A</span><span class="key">S</span><span class="key">D</span> - WASD movement
+            </div>
+            <div class="key-group">
+                <span class="key">↑</span><span class="key">←</span><span class="key">↓</span><span class="key">→</span> - Arrow keys
+            </div>
+            <br>
+            <p><strong>Swerve-specific:</strong></p>
+            <div class="key-group">
+                <span class="key">Q</span><span class="key">E</span> - Rotate left/right
+            </div>
+            <div class="key-group">
+                <span class="key">Z</span><span class="key">C</span> - Strafe left/right
+            </div>
+            <p><strong>Tank Drive:</strong> Uses differential steering - forward/back + left/right turn</p>
+            <p><strong>Swerve Drive:</strong> Full omnidirectional movement with independent translation and rotation</p>
+        </div>
+    </div>
+
+    <script src="simulator.js"></script>
+</body>
+</html>
+
 ## Where to go Next?
 
 Choose the following section based off the drivebase you plan to program:
