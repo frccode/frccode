@@ -606,9 +606,52 @@ public class TeleopSwerveCommand extends CommandBase {
 }
 ```
 
+### Integrating Swerve Drive in RobotContainer
+
+To connect your swerve drive subsystem and teleop command to the overall robot structure:
+1. Instantiate both objects in your `RobotContainer` class. 
+2. Your `TelopSwerveCommand` should be instantiated as a `default command` so that it is running continously.
+
+**Example RobotContainer Setup:**
+
+```java
+public class RobotContainer {
+    // Subsystems
+    private final SwerveDrive swerveDrive = new SwerveDrive();
+
+    // Joystick
+    private final CommandXboxController driverController = new CommandXboxController(0);
+
+    // Teleop command
+    private final TeleopSwerveCommand teleopSwerveCommand = new TeleopSwerveCommand(
+        swerveDrive,
+        () -> driverController.getLeftX(),
+        () -> driverController.getLeftY(),
+        () -> driverController.getRightX()
+    );
+
+    public RobotContainer() {
+        configureBindings();
+    }
+
+    private void configureBindings() {
+        // Set default command for swerve drive
+        swerveDrive.setDefaultCommand(teleopSwerveCommand);
+    }
+}
+```
+
+**Key Steps:**
+- Instantiate the `SwerveDrive` subsystem.
+- Create the teleop command, passing joystick axis suppliers.
+- Set the teleop command as the default for the swerve subsystem.
+- Place all subsystem and command instantiations in `RobotContainer` for centralized management.
+
+This structure ensures your swerve drive responds to joystick input during teleop and is ready for further autonomous command integration.
+
 ## 7. Troubleshooting
 
-### Common Issues and Solutions
+### Common Issues and Possible fixes
 
 **Motors not reciving command input from controller**
 - Trace back your logic and add printlns at each step to see where your code logic stops working

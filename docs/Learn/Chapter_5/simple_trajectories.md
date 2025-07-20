@@ -179,8 +179,6 @@ Below is a simple implementation of WPILIB Trajectory. Follow this guide to get 
 ### Create Your First Trajectory
 1. Create a custom class command that will house your trajectory following code.
 2. Make sure to have the following features
-    - A trajectory config
-    - Start and end Poses
     - A trajectory object taken in as a parameter
     - A swerve subsystem object taken in as a parameter
     - Timer for tracking state of a trajectory
@@ -192,14 +190,14 @@ Below is a simple implementation of WPILIB Trajectory. Follow this guide to get 
 
 
 ### Populate Execute, Initialize, isFinished
-1. Intitalize should contain all your reset methods for:
+1. `Intitalize` should contain all your reset methods for:
     - reseting odometry if it's the first path
     - restarting the internal timer to match with the trajectory time
-2. Execute should contain:
+2. `Execute` should contain:
     - all your trajectory state/swerve measurment readings.
     - The final outputs should be a chassisspeed object that can be fed into the swerve drive.
 
-3. isFinished should terminate when:
+3. `isFinished` should terminate when:
 -  The recorded swerve measurments are in a certain deadband of the goal Pose
 - When our timer exceeds the estimated time for our trajectory.
 
@@ -213,20 +211,9 @@ public class TrajectoryCommand extends CommandBase {
     private static final double POSITION_TOLERANCE = 0.10; // meters
     private static final double ROTATION_TOLERANCE = 5.0; // degrees
 
-    public TrajectoryCommand(SwerveDrive swerve, Trajectory, trajectory) {
+    public TrajectoryCommand(SwerveDrive swerve, Trajectory trajectory) {
         this.swerve = swerve;
         this.trajectory = trajectory;
-
-        // Create trajectory configuration
-        TrajectoryConfig config = new TrajectoryConfig(
-            2.0,  // Max velocity (m/s)
-            1.0   // Max acceleration (m/s²)
-        );
-
-        // Define start and end poses
-        Pose2d start = new Pose2d(0, 0, new Rotation2d(0));
-        Pose2d end = new Pose2d(3, 2, new Rotation2d(Math.PI/2));
-
 
         // Holonomic controller for trajectory following
         holonomicController = new HolonomicDriveController(
@@ -286,16 +273,22 @@ public class TrajectoryCommand extends CommandBase {
 }
 ```
 
-Once finished, test to ensure that the 
-
 ---
 
-## 5. Creating Complex Paths
+## 5. Creating Autos
 
-Now that we've created our first intial trajectory. We can modify our intial trajectory to contain waypoints 
+Now that we've created our first intial trajectory commands, let's fit it into an autonomous sequence.
 
-### Adding Waypoints
+### Creating trajectories
+1. Create a new trajectory config with a max speed and max acceleration
+2. Create a trjaectory with:
+    - Start and Goal Poses
+    - Translation2d type waypoints (Units in Meters)
 ```java
+//   maxSpeed: The maximum speed for the trajectory (in meters per second).
+//   maxAcceleration: The maximum acceleration for the trajectory (in meters per second squared).
+TrajectoryConfig config = new TrajectoryConfig(2.0, 1.0); 
+
 // Curved path through multiple points
 Trajectory complexPath = TrajectoryGenerator.generateTrajectory(
     new Pose2d(0, 0, new Rotation2d(0)),           // Start
@@ -307,9 +300,11 @@ Trajectory complexPath = TrajectoryGenerator.generateTrajectory(
     new Pose2d(4, 1, new Rotation2d(Math.PI)),     // End facing backward
     config
 );
+
+
 ```
 
-### Constraints for Different Sections
+### (Optional)Constraints for Different Sections
 ```java
 // Slower through tight areas
 TrajectoryConfig slowConfig = new TrajectoryConfig(1.0, 0.5);
@@ -320,6 +315,25 @@ slowConfig.addConstraint(new RectangularRegionConstraint(
 ));
 ```
 
+### Apply it to a Drive Trajectory Command
+Here is a full example usage as a full Command. This can be used in a chain of trajectory drive commands as shown in Real-World example below.
+
+```java
+// Single-command autonomous routine using TrajectoryCommand
+public Command testPath1(SwerveDrive swerve) {
+    TrajectoryConfig config = new TrajectoryConfig(2.0, 1.0);
+
+    Trajectory trajectory = TrajectoryGenerator.generateTrajectory(
+        new Pose2d(0, 0, new Rotation2d(0)),
+        List.of(new Translation2d(2, 1), new Translation2d(3, -1)),
+        new Pose2d(4, 0, new Rotation2d(Math.PI)),
+        config
+    );
+
+    return new TrajectoryCommand(swerve, trajectory);
+}
+```
+
 ---
 
 ## 6. Real-World Examples
@@ -327,36 +341,29 @@ slowConfig.addConstraint(new RectangularRegionConstraint(
 ### Simple Autonomous Routine
 ```java
 public class SimpleAuto extends SequentialCommandGroup {
-    public SimpleAuto(SwerveDrive swerve, ShooterSubsystem shooter) {
-        // Configuration for normal movement
-        TrajectoryConfig config = new TrajectoryConfig(3.0, 2.0);
-        
-        // Leave starting position
+    public SimpleAuto(SwerveDrive swerve) {
+        // Trajectory config: max speed 2 m/s, max accel 1 m/s^2
+        TrajectoryConfig config = new TrajectoryConfig(2.0, 1.0);
+
+        // First trajectory: leave starting position
         Trajectory leaveTarmac = TrajectoryGenerator.generateTrajectory(
             new Pose2d(0, 0, new Rotation2d(0)),
-            List.of(),
+            List.of(new Translation2d(1, 0)),
             new Pose2d(2, 0, new Rotation2d(0)),
             config
         );
-        
-        // Return to shoot
+
+        // Second trajectory: return and face backward
         Trajectory returnToShoot = TrajectoryGenerator.generateTrajectory(
             new Pose2d(2, 0, new Rotation2d(0)),
-            List.of(),
-            new Pose2d(0.5, 0, new Rotation2d(Math.PI)), // Face hub
+            List.of(new Translation2d(1, 0)),
+            new Pose2d(0, 0, new Rotation2d(Math.PI)),
             config
         );
-        
+
         addCommands(
-            // Shoot preload
-            new ShootCommand(shooter).withTimeout(2.0),
-            
-            // Drive to pick up ball
-            new SwerveControllerCommand(/* leaveTarmac parameters */),
-            
-            // Return and shoot
-            new SwerveControllerCommand(/* returnToShoot parameters */),
-            new ShootCommand(shooter).withTimeout(2.0)
+            new TrajectoryCommand(swerve, leaveTarmac),
+            new TrajectoryCommand(swerve, returnToShoot)
         );
     }
 }
@@ -368,22 +375,11 @@ public class SimpleAuto extends SequentialCommandGroup {
 
 ### Common Issues & Solutions
 
-**Problem:** Robot doesn't follow path accurately
-- **Solution:** Tune PID controllers, check odometry calibration
-
-**Problem:** Path is too aggressive/jerky  
-- **Solution:** Lower max velocity/acceleration in TrajectoryConfig
-
-**Problem:** Robot overshoots waypoints
-- **Solution:** Increase derivative gains, add velocity constraints
-
-**Problem:** Rotation lags behind translation
-- **Solution:** Tune theta controller separately, check angular constraints
-
-**Problem:** Robot drifts off path over time
-- **Solution:** Improve odometry (better wheel characterization, vision correction)
-
 ### PID Tuning Guidelines
+>**Important** Make sure your swerve drive is tuned properly first before tuning your holonomic controller. See [Chapter 4: Simple Profiling](../Chapter_4/simple_profiling.md) for tunning a velocity controller. Tuning the holonomic controller first will lead to issues in following your trajectory properly.
+
+It's recommended to start big incrementing by ints or in 10s decimals places when tunning.
+
 ```java
 // Start with these values, adjust based on robot performance
 PIDController xController = new PIDController(
@@ -396,36 +392,44 @@ PIDController xController = new PIDController(
 PIDController thetaController = new PIDController(
     2.0,  // P: Higher for rotation
     0.0,  // I: Avoid unless persistent error
-    0.2   // D: Important for smooth rotation
+    0.0   // D: Avoid
 );
 ```
+
+**Problem:** Robot doesn't follow path accurately  
+- **Possible Fix:** Tune PID controllers, check odometry calibration. Are the drive velocity controllers tuned properly?
+
+**Problem:** Robot is not accurate to real world.  
+- **Possible Fix:** Double check field measurements, calibrate all sensors, and confirm the coordinate system matches your field setup. Even small measurement errors can accumulate and lead to noticeable trajectory inaccuracies.
+
+**Problem:** Path is too aggressive/jerky  
+- **Possible Fix:** Lower max velocity/acceleration in TrajectoryConfig.
+
+**Problem:** Robot overshoots waypoints  
+- **Possible Fix:** Increase derivative gains, add velocity constraints. Use SmartDashboard to check if your current pose is lagging behind your goal pose.
+
+**Problem:** Rotation lags behind translation  
+- **Possible Fix:** Tune theta controller separately, check angular constraints.
+
+**Problem:** Robot drifts off path over time  
+- **Possible Fix:** Improve odometry (better wheel characterization, vision correction).
+
+### **Success Criteria:**
+- Robot follows planned path within 10cm accuracy
+- Smooth acceleration and deceleration
+- Consistent timing for autonomous coordination
+- Independent rotation works smoothly
+
 
 ---
 
 ## 8. Advanced Techniques
 
-### Vision-Corrected Trajectories
-```java
-public class VisionCorrectedTrajectory extends CommandBase {
-    @Override
-    public void execute() {
-        // Get vision correction
-        Optional<Pose2d> visionPose = photonVision.getEstimatedPose();
-        
-        if (visionPose.isPresent()) {
-            // Correct odometry with vision
-            swerve.addVisionMeasurement(visionPose.get(), Timer.getFPGATimestamp());
-        }
-        
-        // Continue following trajectory with corrected pose
-        followTrajectory();
-    }
-}
-```
-
 ### Dynamic Trajectory Generation
+Below is a simple Drive to Pose that can be useful for games where the player needs to autonomously align with scoring or loading positions.
+
 ```java
-public void generatePathToTarget(Pose2d target) {
+public Command autoTargetPose(SwerveDrive swerve, Pose2d target) {
     // Create new trajectory from current position
     Trajectory dynamicPath = TrajectoryGenerator.generateTrajectory(
         swerve.getPose(),      // Start from where we are now
@@ -435,74 +439,13 @@ public void generatePathToTarget(Pose2d target) {
     );
     
     // Start following immediately
-    new FollowTrajectoryCommand(swerve, dynamicPath).schedule();
+    return new TrajectoryCommand(swerve, dynamicPath)
 }
 ```
-
-### State-Dependent Rotation
-```java
-// Face target while moving
-public class FaceTargetWhileMoving extends CommandBase {
-    @Override
-    public void execute() {
-        // Follow translation trajectory
-        TrajectoryState state = trajectory.sample(timer.get());
-        
-        // Calculate rotation to face target
-        Translation2d robotToTarget = target.minus(swerve.getPose().getTranslation());
-        Rotation2d targetHeading = new Rotation2d(robotToTarget.getX(), robotToTarget.getY());
-        
-        // Combine trajectory velocity with target-facing rotation
-        ChassisSpeeds speeds = new ChassisSpeeds(
-            state.velocityMetersPerSecond * state.poseMeters.getRotation().getCos(),
-            state.velocityMetersPerSecond * state.poseMeters.getRotation().getSin(),
-            thetaController.calculate(swerve.getPose().getRotation().getRadians(), 
-                                    targetHeading.getRadians())
-        );
-        
-        swerve.drive(speeds);
-    }
-}
-```
-
 ---
 
-## 9. Practice Project
-
-**Build this step-by-step:**
-
-1. **Basic Straight Line** - Simple point A to point B trajectory
-2. **Add Waypoints** - Create curved paths through multiple points
-3. **Closed-Loop Control** - Add PID feedback for accuracy
-4. **Complex Autonomous** - Multi-step routine with trajectories
-5. **Independent Rotation** - Face different directions while moving
-6. **Dynamic Planning** - Generate trajectories on-the-fly
-
-**Success Criteria:**
-- Robot follows planned path within 10cm accuracy
-- Smooth acceleration and deceleration
-- Consistent timing for autonomous coordination
-- Independent rotation works smoothly
-
----
-
-## Reference Links
+## Links for further reference
 
 **Visual Path Planning**
 - [PathPlanner](https://pathplanner.dev/) - Visual trajectory designer
 - [Choreo](https://sleipnirgroup.github.io/Choreo/) - Advanced trajectory optimization
-
-**Real-Time Planning**
-- [PPLIB](https://pathplanner.dev/pplib-getting-started.html) - Real-time path generation
-- [Dynamic Constraints](https://docs.wpilib.org/en/stable/docs/software/pathplanning/trajectory-generation.html#constraints) - Adaptive speed limits
-
-**Advanced Control**
-- [Ramsete Controller](https://docs.wpilib.org/en/stable/docs/software/pathplanning/ramsete.html) - Nonlinear trajectory following
-- [LTV Unicycle Controller](https://docs.wpilib.org/en/stable/docs/software/advanced-controls/trajectories/ramsete.html) - Optimal trajectory tracking
-
-**Competition Integration**
-- [Auto Selector](https://docs.wpilib.org/en/stable/docs/software/dashboards/smartdashboard/choosing-an-autonomous-program.html) - Multiple autonomous routines
-- [PathPlanner Autos](https://pathplanner.dev/gui-auto-editor.html) - Complex autonomous sequences
-
-
-**Next steps:** Advanced path planning and real-time trajectory generation using [WPILib's PathPlanner](https://pathplanner.dev/) and [trajectory documentation](https://docs.wpilib.org/en/stable/docs/software/pathplanning/index.html).
