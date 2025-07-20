@@ -5,15 +5,17 @@
 1. [Introduction](#introduction)
 2. [Core Concepts](#core-concepts)
 3. [Mathematical Foundation](#mathematical-foundation)
-4. [Control Systems](#control-systems)
+4. [Additional Control Concepts](#additional-control-concepts)
 5. [Coordinate Systems](#coordinate-systems)
 6. [Implementation Guide](#implementation-guide)
-7. [Code Examples](#code-examples)
-8. [Troubleshooting](#troubleshooting)
-9. [Additional Resources](#additional-resources)
+7. [Troubleshooting](#troubleshooting)
+8. [Additional Resources](#additional-resources)
 
 ## 1. Introduction
-This guide covers the programming concepts needed to implement a differential (tank) drive system using WPILIB.
+
+This guide covers the programming concepts needed to implement a differential (tank) drive system using WPILIB. Understanding how joystick inputs are translated into motor commands will help you debug common programming issues.
+
+> **Note:** While WPILIB provides high-level abstractions for tank drive, learning the underlying principles will give you more control and flexibility in your robot code.
 
 **What You'll Learn:**
 - Fundamental tank drive concepts
@@ -24,40 +26,41 @@ This guide covers the programming concepts needed to implement a differential (t
 
 ## 2. Core Concepts
 
-**Differential (Tank) Drive**
-A differential (tank) drive system consists of two sets of wheels—left and right—that are powered independently. The robot turns by varying the speed between the two sides, allowing for precise control of direction. This configuration is simple, robust, and widely used in FRC due to its reliability and ease of implementation.
+Below are some common terms associated with differential (tank) drive:
 
-### Control Methods
+### Control Definitions
 
-**Trajectory Control**
-- Pre-planned or dynamically generated paths
-- Used for autonomous navigation
+* **Differential (Tank) Drive**
+    - Two sets of wheels (left and right) powered independently
+    - Robot turns by varying speed between sides
+    - Simple, robust, and widely used in FRC
 
-**Teleop Control**
-- Direct driver control via joysticks or tank controls
-- Real-time response to input
+* **Teleop Control**
+    - Direct driver control via joysticks or tank controls
+    - Real-time response to input
 
 ### Key Components
-- **Left Motors**: Drive the left side
-- **Right Motors**: Drive the right side
-- **Encoders**: Measure wheel rotation for distance/speed
-- **Gyro**: Measures robot heading (optional but recommended)
 
+* **Left Motors**: Drive the left side
+* **Right Motors**: Drive the right side
+* **Encoders**: Measure wheel rotation for distance/speed
+* **Gyro**: Measures robot heading (optional but recommended)
 
 ### Key Classes in WPILIB
 
-Listed here are the objects/libraries from wpilib that are used to help with writing a diffierential drive. 
+#### **DifferentialDrive**
 
-**DifferentialDrive**
+Controls left and right motors for tank drive.
+
 ```java
-// Controls left and right motors
 DifferentialDrive drive = new DifferentialDrive(leftMotor, rightMotor);
 ```
 
+#### **ChassisSpeeds**
 
-**ChassisSpeeds**
+Represents the desired movement of the robot as a whole.
+
 ```java
-// Stores target velocities for the robot
 ChassisSpeeds chassisSpeeds = new ChassisSpeeds(
     xVelocity,    // Forward/backward speed (m/s)
     0.0,          // No strafe for tank drive
@@ -125,10 +128,17 @@ WPILIB uses the same coordinate system as swerve drive. Consistency is important
 
 ## 6. Implementation Guide
 
-### Basic Tank Drive Class Structure
-Implement this class as a template subsystem for your differential drive. This class is the factory that will run your differential drive.
+Below is a step-by-step guide for implementing a basic differential (tank) drive subsystem and teleop command.
 
-Call the drive method periodically to set forward, backwards, and rotational speeds.
+### Step 1: Create Your Tank Drive Subsystem
+
+Start by building a subsystem class to encapsulate all hardware and drive logic. This class should manage the motors, encoders, and gyro, and provide a method to drive the robot.
+
+**Key Features:**
+- Holds references to motors, encoders, and gyro
+- Provides a `drive` method for controlling movement
+- Initializes all hardware in the constructor
+
 ```java
 public class TankDrive extends SubsystemBase {
     private final DifferentialDrive drive;
@@ -149,9 +159,15 @@ public class TankDrive extends SubsystemBase {
 }
 ```
 
-### Teleop Command Implementation
+### Step 2: Implement a Teleop Command
 
-Use this command template for controlling your differential drive using suppliers. Refer to [Suppliers](../drive_bases.md#suppliers).
+Create a command class to handle teleoperated driving. This command reads joystick values using suppliers, applies a deadband for smoother control, and calls the drive method.
+
+**Key Steps:**
+- Accepts suppliers for forward and rotation input
+- Applies deadband to filter out small joystick noise
+- Calls the subsystem's drive method each cycle
+
 ```java
 public class TeleopTankCommand extends CommandBase {
     private final TankDrive tankDrive;
@@ -177,7 +193,15 @@ public class TeleopTankCommand extends CommandBase {
     }
 }
 ```
-### Example Usage in RobotContainer
+
+### Step 3: Integrate into
+
+Set up your subsystem and command in `RobotContainer` to enable teleop driving. Use suppliers to connect joystick axes to your command.
+
+**Key Steps:**
+- Instantiate the subsystem and controller
+- Set the teleop command as the default for the subsystem
+- Use lambda expressions to supply joystick values
 
 ```java
 public class RobotContainer {
@@ -198,7 +222,7 @@ public class RobotContainer {
 ```
 
 
-## 7. Code Examples
+## 7. Extra Features
 
 ### Encoder Distance Calculation
 ```java
@@ -211,29 +235,17 @@ public double getRightDistance() {
 }
 ```
 
-### Odometry Setup
-```java
-private final DifferentialDriveOdometry odometry;
-
-public void updateOdometry() {
-    odometry.update(gyro.getRotation2d(), getLeftDistance(), getRightDistance());
-    SmartDashboard.putString("Robot Pose", odometry.getPoseMeters().toString());
-}
-```
-
-## 8. Troubleshooting
+## 8. Troubleshooting and Possible Fixes
 
 **Robot Drifts or Turns Unexpectedly**
-- Check for motor inversion or wiring issues
-- Verify encoder and gyro calibration
+- Verify encoder and gyro readings
 
 **Inaccurate Distance or Heading**
-- Ensure encoder conversion factors are correct
-- Calibrate gyro
+- Ensure encoder conversion factors/instantiations are correct
 
 **Jerky or Unstable Movement**
-- Tune PID gains
 - Add input deadbands
+- Add 0.5 or 0.2 scale factors to decrease "sensitivity"
 
 ## 9. Additional Resources
 
