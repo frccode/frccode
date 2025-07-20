@@ -709,7 +709,8 @@ public void updateOdometry() {
 ## 9. Reference Resources
 
 - [WPILIB Swerve Drive Documentation](https://docs.wpilib.org/en/stable/docs/software/kinematics-and-odometry/swerve-drive-kinematics.html)
-- [SwerveLib by Team 5190](https://github.com/5190GreenHopeRobotics/5190-Library)
+- [Yagsl Library](https://docs.yagsl.com)
+- [PhantomCatz RobotCode2025 Swerve Implementation (GitHub)](https://github.com/PhantomCatz/RobotCode2025-Reefscape/tree/main/SeasonCode2025/src/main/java/frc/robot/CatzSubsystems/CatzDriveAndRobotOrientation)
 
 ---
 
