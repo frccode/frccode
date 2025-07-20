@@ -1,8 +1,12 @@
-# Kalman Filters & Pose Estimation: Getting Started
+# Pose Estimation: Getting started
 
 ## Overview
 
-Kalman filters are "smart" sensors that combine multiple imperfect measurements to create a better estimate than any single sensor alone. Think of them as a mathematical way to blend wheel odometry, gyroscopes, and vision data to know exactly where your robot is on the field - even when individual sensors drift or have noise.
+This section covers the fundementals behind Pose Estimation and all the content needed to understand what's going on "under the hood." Understanding how kalman filters blend vision and wheel odometry together will greatly help users program accurate compeititon ready pose estimation for autonomous trajectory and robot automation.
+
+>**Important:** Before going over this section, ensure that you've read through WPILIB coordinate system(TODO put link here). Common Pose Estimation issues arise when the user doesn't understand how the WPILIB coordinate system works, causing them to add negatives to coordinates that shouldn't be inverted or placing their pose on the wrong alliance, etc. etc. 
+
+>**Important** This section also contains example code related to [Swerve Drive Control](../swerve_control.md). It is recommended to review that first before going through this section.
 
 **What you'll build:** A robot that maintains accurate position tracking by fusing encoder, gyro, and vision measurements.
 
@@ -13,17 +17,33 @@ Kalman filters are "smart" sensors that combine multiple imperfect measurements 
 ## 1. Why Kalman Filters?
 
 ### The Sensor Fusion Problem
-**Individual sensors have problems:**
+
+Illustraed below are the 3 inputs the user can take for defining a robot position on the field and their benifits/disadvantages.
+
+### Wheel Odometry
+
+Wheel odometry provides accurate short-term position tracking but can drift over time due to wheel slip.
+
 ```java
-// Wheel odometry: Accurate short-term, drifts over time
-Pose2d wheelPose = odometry.getPoseMeters(); // Drifts due to wheel slip
-
-// Vision: Accurate but noisy and intermittent  
-Pose2d visionPose = camera.getRobotPose(); // Jumpy, sometimes wrong
-
-// Gyro: Good for rotation, but can drift
-Rotation2d heading = gyro.getRotation2d(); // Slowly drifts over time
+Pose2d wheelPose = odometry.getPoseMeters();
 ```
+
+### Vision
+
+Vision systems offer accurate measurements but are often noisy and intermittent, leading to jumpy or occasionally incorrect readings.
+
+```java
+Pose2d visionPose = camera.getRobotPose();
+```
+
+### Gyro
+
+Gyros are reliable for tracking rotation but may slowly drift over time.
+
+```java
+Rotation2d heading = gyro.getRotation2d();
+```
+Solving this issue requires the use of a Kalman filter, which can seamlessly combine these three sources of data to produce a pose that the user can trust with high precision and accuracy.
 
 **Kalman filter solution:**
 ```java
@@ -43,6 +63,8 @@ Pose2d bestEstimate = poseEstimator.getEstimatedPosition(); // Smooth and accura
 ---
 
 ## 2. How Kalman Filters Work
+
+In a over oversimplified sense, Kalman filters work in a Two Step Model shown below
 
 ### The Two-Step Dance
 
@@ -73,10 +95,16 @@ if (hasVisionMeasurement) {
 ### Key Concepts
 
 **State** - What we're tracking (robot X, Y, rotation)
+
 **Model** - How we predict state changes (wheel movement)
+
 **Measurement** - What sensors tell us (vision pose)
+
 **Uncertainty** - How much we trust each source
+
 **Covariance** - Mathematical measure of uncertainty
+
+For more infomration on this subject, please check out [Kalman filter theory and background](https://www.kalmanfilter.net/background.html)
 
 ---
 
@@ -143,11 +171,20 @@ public class SmartFlywheelSubsystem extends SubsystemBase {
 VecBuilder.fill(3.0)   // Larger = trust model less, trust measurements more
 
 // Measurement uncertainty: How much we trust our sensors  
-VecBuilder.fill(0.01)  // Larger = trust measurements less, trust model more
+VecBuilder.fill(0.01)  // Larger = trust measurements more, trust model less
 ```
 
-**Tuning Rules:**
-- **Noisy encoder?** Increase measurement uncertainty (0.01 → 0.1)
+The values that are shoved in are refered to as **Standard Deviations**. For purposes of this section, you can think of them as simply inverted "confidence values" for your kalman model.
+
+In a more deep explanation, standard deviation is a measure of uncertainty or variability in your model or sensor readings. It quantifies how much you expect your values to deviate from the true value.
+
+>**Note:** Please note the difference between **Model** and **Measurment** standard deviations as shown above. However, also note that WPILIB pose estimation only uses the latter "Measurement" standard deviation.
+
+
+
+
+**Standard Deviation General Guidelines:**
+- **Noisy measurment?** Increase measurement uncertainty (0.01 → 0.1)
 - **Model inaccurate?** Increase model uncertainty (3.0 → 10.0)
 - **Want faster response?** Decrease measurement uncertainty
 - **Want smoother output?** Increase measurement uncertainty
@@ -155,6 +192,10 @@ VecBuilder.fill(0.01)  // Larger = trust measurements less, trust model more
 ---
 
 ## 4. WPILib Pose Estimators
+
+WPILIB makes pose estimation easy by combining data from your gyro, vision system, and wheel odometry into a single library object. This means you don’t have to manually blend sensor readings or build your own Kalman filter—WPILIB does it all for you, giving you smooth and accurate robot position tracking with just a few lines of code. 
+
+Below is an example on how to use a pose estimator within a Swerve Drive implementation. Notice the 2 lines of **Measurment Standard Deviation** in the parameters.
 
 ### Swerve Drive Pose Estimator
 ```java
@@ -185,6 +226,8 @@ public class SwerveDriveSubsystem extends SubsystemBase {
             getModulePositions(),
             new Pose2d(),
             
+
+            //NOTE: These stantdard deviations are provided as an example, std devs will differ depending on the team, vision setup, and preferences.
             // State standard deviations [x, y, rotation]
             VecBuilder.fill(0.1, 0.1, Math.toRadians(5)),  // Trust odometry
             
@@ -239,7 +282,15 @@ public class SwerveDriveSubsystem extends SubsystemBase {
 }
 ```
 
+
+
+
+
 ### Vision Integration
+In simple terms, many 3rd party vision vendors have provided libraries that can take the apriltage information collected and process it into a "Pose2d" object through triangulation. It is recommended to use one of the already existing libraries to obtain a pose through their already tested Localization Piplines
+
+We will use the [PhotonVision](https://docs.photonvision.org/en/latest/docs/apriltag-pipelines/multitag.html). implementation of Vision provided Pose as it is the easiest to explain. Examples from Limelight can be found at their doucmentation at
+ [Limelight](https://docs.limelightvision.io/docs/docs-limelight/pipeline-apriltag/apriltag-robot-localization-megatag2).
 ```java
 public class VisionSubsystem extends SubsystemBase {
     private final PhotonCamera camera;
@@ -280,11 +331,18 @@ public class VisionSubsystem extends SubsystemBase {
 
 ---
 
-## 5. Tuning Your Pose Estimator
+## 5. Tuning Your WPILIB Standard Deviations
+
+WPILIB pose estimator takes in two types of Measurement Standard Deviations: "Odometry/Gyro", and "Vision".
+
+Teams have different preferences for tuning their numbers. Here are a few guidelines however:
+- Keep x and y standard deviations consistent within a certain Standard Deviation set as shown below(AKA don't make your x uncertainty and y uncertainty different values)
+- Keep a higher trust on Odometry(Lower Number) and lower trust on vision(Higher Number)to prevent noisy pose estimation (Remember, odometry is smooth and can bridge the gaps between vision estimations)
+- Contrary to the previous statment made that rotation drifts over time, many teams recommend putting higher trust values on gyro data as it has proven to be accurate enough over a match period without the need for vision correction.
 
 ### Understanding Standard Deviations
 ```java
-// State standard deviations - how much we trust odometry
+// Odometry standard deviations - how much we trust odometry
 VecBuilder.fill(
     0.1,                     // X uncertainty: ±10cm
     0.1,                     // Y uncertainty: ±10cm  
@@ -301,6 +359,8 @@ VecBuilder.fill(
 
 ### Tuning Guidelines
 
+Below are some preset Measurement Standard Deviations you can copy over to your pose estimation enviroment:
+
 **Good Odometry (new wheels, accurate gyro):**
 ```java
 // Trust odometry more
@@ -316,6 +376,9 @@ VecBuilder.fill(0.3, 0.3, Math.toRadians(15))   // Vision std devs
 ```
 
 **Distance-Based Vision Tuning:**
+The concept for this is based on the fact vision becomes more accurate, precise, and less noisy the closer you are to the tag. This logic scales the vision standard deviation to match how far the robot is away from the tag. Farther = less reliable.
+
+For a real-world example of distance-based vision tuning, see [Mechanical Advantage's Vision.java (line 212)](https://github.com/Mechanical-Advantage/RobotCode2025Public/blob/850a1f7656bf3c4603d671caabb7947fcaa0f262/src/main/java/org/littletonrobotics/frc2025/subsystems/vision/Vision.java#L212), where the vision measurement standard deviation is dynamically scaled based on the robot's distance to the AprilTag.
 ```java
 public void addVisionMeasurement(Pose2d visionPose, double timestamp) {
     // Calculate distance to nearest AprilTag
@@ -338,6 +401,9 @@ public void addVisionMeasurement(Pose2d visionPose, double timestamp) {
 ## 6. Real-World Applications
 
 ### Auto-Alignment with Pose Estimation
+
+For those that want to get into automated scoring features, a simple "pose to pose" code can be a great jumping off point. 
+
 ```java
 public class DriveToPositionCommand extends CommandBase {
     private final SwerveDriveSubsystem drive;
@@ -381,25 +447,14 @@ public class DriveToPositionCommand extends CommandBase {
 }
 ```
 
-### Field-Relative Autonomous
-```java
-public class FieldRelativeAuto extends SequentialCommandGroup {
-    public FieldRelativeAuto(SwerveDriveSubsystem drive) {
-        addCommands(
-            // Drive to specific field positions using pose estimation
-            new DriveToPositionCommand(drive, new Pose2d(2, 1, Rotation2d.fromDegrees(0))),
-            new DriveToPositionCommand(drive, new Pose2d(4, 3, Rotation2d.fromDegrees(180))),
-            new DriveToPositionCommand(drive, new Pose2d(1, 5, Rotation2d.fromDegrees(90)))
-        );
-    }
-}
-```
-
 ---
 
 ## 7. Debugging and Monitoring
 
 ### Essential Telemetry
+
+It is recommended to log every component (Vision, Gyro, Wheel Odometry Poses) to better debug if your Pose Estimator is not throwing the right positioning. Below is a copiable example of what to log for debugging:
+
 ```java
 @Override
 public void periodic() {
@@ -447,6 +502,9 @@ public void periodic() {
 - **Solution:** Reduce vision frequency, optimize pose calculation
 
 ### Quality Metrics
+
+Below is a simple code sinpet that can test how accurate your vision system is for pose estimation. This can help determine standard deviations or camera placment.
+
 ```java
 public class PoseEstimatorDiagnostics {
     private final List<Double> visionErrors = new ArrayList<>();
@@ -496,25 +554,9 @@ public class PoseEstimatorDiagnostics {
 
 ## Where to Go Next
 
-**Ready for advanced estimation? Explore these:**
+**Explore these topics related to Pose Estimation:**
 
-**🎯 Advanced State-Space Control**
-- [Linear Quadratic Regulator](https://docs.wpilib.org/en/stable/docs/software/advanced-controls/state-space/state-space-intro.html#the-linear-quadratic-regulator) - Optimal feedback control
-- [Custom State-Space Models](https://docs.wpilib.org/en/stable/docs/software/advanced-controls/state-space/state-space-intro.html) - Model complex mechanisms
-
-**🔧 Sensor Fusion Techniques**
-- [Unscented Kalman Filters](https://github.com/wpilibsuite/allwpilib/blob/main/wpimath/src/main/java/edu/wpi/first/math/estimator/UnscentedKalmanFilter.java) - Handle nonlinear systems
-- [Multi-Camera Fusion](https://docs.photonvision.org/en/latest/docs/programming/photonlib/getting-target-data.html) - Combine multiple vision sources
-
-**📊 Performance Optimization**
-- [Extended Kalman Filters](https://en.wikipedia.org/wiki/Extended_Kalman_filter) - Advanced nonlinear estimation
-- [Particle Filters](https://en.wikipedia.org/wiki/Particle_filter) - Handle non-Gaussian noise
-
-**⚡ Competition Applications**
-- [PathPlanner Integration](https://pathplanner.dev/pplib-getting-started.html) - Pose-corrected path following
-- [Real-Time Trajectory Correction](https://docs.wpilib.org/en/stable/docs/software/pathplanning/index.html) - Adaptive autonomous
-- [Match Replay Analysis](https://docs.wpilib.org/en/stable/docs/software/telemetry/datalog.html) - Post-match pose tracking
+> **TODO:** Redo the links list below to include relevant resources for pose estimation, Kalman filters, WPILib documentation, and vision integration. Ensure all links are up-to-date and clearly labeled for easy navigation.
 
 ---
 
-**🚀 Ready to master robot localization?** Start with basic filtering, understand the fundamentals, then build competition-ready pose estimation systems that rival GPS accuracy!
