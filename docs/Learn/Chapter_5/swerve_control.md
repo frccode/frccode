@@ -660,9 +660,8 @@ public void updateOdometry() {
 
 1. **Start Simple**: Begin with basic teleop control before adding autonomous features
 2. **Test Incrementally**: Test each module individually before running full swerve
-3. **Use Simulation**: WPILIB's swerve simulation helps debug without hardware
-4. **Monitor Performance**: Always log module states and robot pose for debugging
-5. **Consistent Units**: Use meters and radians throughout for consistency with WPILIB
+3. **Monitor Performance**: Always log module states and robot pose for debugging
+4. **Consistent Units**: Use meters and radians throughout for consistency with WPILIB
 
 ## 9. Reference Resources
 
