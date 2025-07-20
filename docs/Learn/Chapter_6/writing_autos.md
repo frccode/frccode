@@ -499,8 +499,8 @@ public void periodic() {
 
 **Linked below are extra resources and disscussions for autonomous performance**
 
-**⚡ Competition Strategies**
-- [Auto Selection](https://docs.wpilib.org/en/stable/docs/software/dashboards/smartdashboard/choosing-an-autonomous-program.html) - Dynamic autonomous choosing
-- [Alliance Coordination](https://www.chiefdelphi.com/c/technical/programming/12) - Multi-robot autonomous planning
+**Competition Strategies**
+
+> **TODO:** The links in this section are not working properly and need to be redone.
 
 ---

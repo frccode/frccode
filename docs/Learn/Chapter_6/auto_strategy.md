@@ -146,11 +146,7 @@ Second pick autos prioritized reliable mobility and collecting game pieces that 
 **Ready for implementation? Continue with:**
 - **[FRC Autonomous Programming - Implementation](./writing_autos.md)** – Technical implementation of your strategic plans
 
-**Additional Strategic Resources:**
-- [Game Analysis Frameworks](https://www.chiefdelphi.com/) - Community discussions on strategy
-- [Competition Scouting](https://www.thebluealliance.com/) - Data-driven strategic decisions
 
 ---
 
 
----
