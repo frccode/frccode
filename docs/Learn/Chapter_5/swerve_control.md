@@ -31,35 +31,37 @@ For a quick start, you can skip to the [Implementation Guide](#implementation-gu
 
 ## 2. Core Concepts
 
-**Holonomic Drive Defininition (Swerve)**
-- Can move in any direction independent of orientation
-- Each wheel can rotate and steer independently
-- More complex but more capable
+Below are some common terms associated with swerve drive:
 
-### Control Methods
+### Control Definitions
 
-**Trajectory Control**
-- Pre-planned or dynamically generated paths
-- Automated movement along specific routes
-- Used for autonomous navigation
+* **Holonomic Drive Defininition (Swerve)**
+    - Can move in any direction independent of orientation
+    - Each wheel can rotate and steer independently
+    - More complex but more capable
 
-**Teleop Control**
-- Direct driver control via joysticks
-- Real-time response to input
-- Used during driver-controlled periods
+* **Trajectory Control**
+    - Pre-planned or dynamically generated paths
+    - Automated movement along specific routes
+    - Used for autonomous navigation
+
+* **Teleop Control**
+    - Direct driver control via joysticks
+    - Real-time response to input
+    - Used during driver-controlled periods
 
 ### Swerve Module Components
 
-Each swerve module consists of:
-- **Drive Motor**: Controls wheel speed
-- **Steer Motor**: Controls wheel direction
-- **Encoder**: Provides position feedback
-- **Wheel**: The contact point with the ground
+* Each swerve module consists of:
+    - **Drive Motor**: Controls wheel speed
+    - **Steer Motor**: Controls wheel direction
+    - **Encoder**: Provides position feedback
+    - **Wheel**: The contact point with the ground
 
-The drive motor, steer motor, and encoder are usually team specific and require their own unique instantiation. 
-- **Drive Motor**
-- **Steer Motor**
-- **Absolute Encoder**
+* The drive motor, steer motor, and encoder are usually team specific and require their own unique instantiation. 
+    - **Drive Motor**
+    - **Steer Motor**
+    - **Absolute Encoder**
 
 
 ### Key Classes in WPILIB
@@ -111,7 +113,7 @@ SwerveModuleState moduleState = new SwerveModuleState(
 The `SwerveDriveKinematics` class in WPILIB is responsible for converting desired robot motion (chassis speeds) into individual swerve module states (speed and angle for each wheel). It uses the physical positions of each module relative to the robot center to perform these calculations.
 
 * **How to create a kinematics object:**
-You must specify the position of each swerve module as a `Translation2d` from the robot's center.
+You must specify the position of each swerve module as a `Translation2d` from the robot's center in meters.
 
 ```java
 // Example: Four-module swerve drive
@@ -123,7 +125,7 @@ SwerveDriveKinematics kinematics = new SwerveDriveKinematics(
 );
 ```
 
-* Example: Using the Kinematics Object: Below is a simple example of converting desired robot motion into individual swerve module states using the `SwerveDriveKinematics` object:
+* Below is a simple example of converting desired robot motion into individual swerve module states using the `SwerveDriveKinematics` object:
 
 ```java
 // Desired robot motion (forward, sideways, rotation)
@@ -140,7 +142,7 @@ Joystick inputs flow down to the motors on the drivetrain using a sequence shown
 
 **Command Layer Flowchart**
 
-```mermaid
+```
     A[Joystick Inputs] --> B[TeleopSwerveCommand.execute()]
     B --> C[Apply Red alliance flipping if applicable, scaling, deadbands]
     C --> D[ChassisSpeeds.fromFieldRelativeSpeeds()]
@@ -149,7 +151,7 @@ Joystick inputs flow down to the motors on the drivetrain using a sequence shown
 
 **Drive Subsystem Flowchart**
 
-```mermaid
+```
     F[SwerveDrive.drive(chassisSpeeds)] --> 
     F --> G[SwerveDriveKinematics.toSwerveModuleStates()]
     G --> H[SwerveDriveKinematics.desaturateWheelSpeeds()]
@@ -217,17 +219,19 @@ Below are some additional concepts that will help optimize your swerve drive so 
 Speed desaturation ensures that no swerve module is commanded to exceed its physical maximum speed. When combined translation and rotation commands result in wheel speeds above this limit, all module speeds are scaled down proportionally. This maintains the intended motion direction while keeping commands achievable for the hardware.
 
 **How it works:**  
-When calculated module speeds exceed maximum velocity, all modules must be scaled proportionally:
+When calculated module speeds exceed maximum velocity, all modules must be scaled proportionally. Below is the code that scales down all module speeds proportionally:
 
 ```java
-// Find the maximum speed
-double maxSpeed = Collections.max(Arrays.asList(speeds));
-
-// If any speed exceeds maximum, scale all down
-if (maxSpeed > MAX_SPEED_MPS) {
-    double scaleFactor = MAX_SPEED_MPS / maxSpeed;
-    for (int i = 0; i < speeds.length; i++) {
-        speeds[i] *= scaleFactor;
+public static void desaturateWheelSpeeds(SwerveModuleState[] moduleStates, double attainableMaxSpeedMetersPerSecond) {
+    double recordedSpeed = 0;
+    for (SwerveModuleState moduleState : moduleStates) {
+        recordedSpeed = Math.max(recordedSpeed, Math.abs(moduleState.speedMetersPerSecond));
+    }
+    if (recordedSpeed > attainableMaxSpeedMetersPerSecond) {
+        for (SwerveModuleState moduleState : moduleStates) {
+            moduleState.speedMetersPerSecond =
+                moduleState.speedMetersPerSecond / recordedSpeed * attainableMaxSpeedMetersPerSecond;
+        }
     }
 }
 ```
@@ -283,6 +287,7 @@ double feedback = drivePID.calculate(currentVelocity, targetVelocity);
 driveMotor.setVoltage(feedforward + feedback);
 ```
 
+Please reference [Simple Profiling for Swerve Drive](./Chapter_4/simple_profiling.md) for an in depth explanation on how to tune a velocity control system.
 ## 5. Coordinate Systems
 
 ![WPILIB Swerve Coordinate System](./SwerveCoord1.png)
@@ -312,7 +317,7 @@ Understanding and adhering to the WPILIB coordinate system is crucial because it
 
 
 ### Key Swerve Coordinate System Adjustments to keep track of
-**Red Alliance Considerations:** 🔴
+**Red Alliance Considerations:** 
 
 Actions(Driver inputs, autonomous paths) taken on the Red Alliance side must be mirrored 
 
@@ -388,9 +393,12 @@ Implementing a swerve module centralizes all motor, encoder, and control logic i
 Follow these steps:
 
 1. Copy the following swerve module class into your robot project.
-2. Adjust CAN IDs, gear ratios, and wheel dimensions for your hardware.
-3. Tune the PID and feedforward constants for your drivetrain.
-4. Ensure encoder readings and motor outputs match your mechanical setup (see [Steering Inversion Considerations](#steering-inversion-considerations)).
+2. Adjust CAN IDs, gear ratios, and wheel dimensions for your hardware
+3. Setup class constructor to take in all CAN IDs needed for your swerve module (drive, steer, absolute encoder)
+4. Tune the PID and feedforward constants for your drivetrain. See 
+ [Simple profiling](../Chapter_4/simple_profiling.md) for more in depth on tuning velocity control systems.
+5. Ensure encoder readings and motor outputs match your mechanical setup (see [Steering Inversion Considerations](#steering-inversion-considerations)).
+
 
 Key features:
 - Encapsulates drive and steer motor control
@@ -474,7 +482,7 @@ This subsystem serves as the central hub for swerve drive control. It receives c
 Follow these steps:
 1. Copy the following swerve drive subsystem into your robot project.
 2. Ensure the module array order matches your kinematics setup (see [Kinematics Setup](#kinematics-setup)).
-3. Adjust CAN IDs and constants as needed for your hardware.
+3. Adjust CAN IDs and constants as needed for your hardware. Ensure the parameters align with what you defined in your swerve module class.
 
 
 Topics covered: [SwerveDriveKinematics Object](#swervedrivekinematics-object), [SwerveModuleState](#swervemodulestate), [ChassisSpeeds](#chassisspeeds), [Speed Desaturation](#speed-desaturation), [Wheel Optimization](#wheel-optimization)
@@ -656,11 +664,9 @@ public void updateOdometry() {
 4. **Monitor Performance**: Always log module states and robot pose for debugging
 5. **Consistent Units**: Use meters and radians throughout for consistency with WPILIB
 
-## 9. Additional Resources
+## 9. Reference Resources
 
 - [WPILIB Swerve Drive Documentation](https://docs.wpilib.org/en/stable/docs/software/kinematics-and-odometry/swerve-drive-kinematics.html)
-- [Team 364's Swerve Guide](https://www.team364.org/programming)
-- [Chief Delphi Swerve Resources](https://www.chiefdelphi.com/)
 - [SwerveLib by Team 5190](https://github.com/5190GreenHopeRobotics/5190-Library)
 
 ---
