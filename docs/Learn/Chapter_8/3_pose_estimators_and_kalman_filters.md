@@ -556,41 +556,7 @@ public class PoseEstimatorDiagnostics {
 
 **Explore these topics related to Pose Estimation:**
 
-**🎯 Advanced State-Space Control**
-- [Linear Quadratic Regulator](https://docs.wpilib.org/en/stable/docs/software/advanced-controls/state-space/state-space-intro.html#the-linear-quadratic-regulator) - Optimal feedback control
-- [Custom State-Space Models](https://docs.wpilib.org/en/stable/docs/software/advanced-controls/state-space/state-space-intro.html) - Model complex mechanisms
-
-**🔧 Sensor Fusion Techniques**
-- [Unscented Kalman Filters](https://github.com/wpilibsuite/allwpilib/blob/main/wpimath/src/main/java/edu/wpi/first/math/estimator/UnscentedKalmanFilter.java) - Handle nonlinear systems
-- [Multi-Camera Fusion](https://docs.photonvision.org/en/latest/docs/programming/photonlib/getting-target-data.html) - Combine multiple vision sources
-
-**📊 Performance Optimization**
-- [Extended Kalman Filters](https://en.wikipedia.org/wiki/Extended_Kalman_filter) - Advanced nonlinear estimation
-- [Particle Filters](https://en.wikipedia.org/wiki/Particle_filter) - Handle non-Gaussian noise
-
-**⚡ Competition Applications**
-- [PathPlanner Integration](https://pathplanner.dev/pplib-getting-started.html) - Pose-corrected path following
-- [Real-Time Trajectory Correction](https://docs.wpilib.org/en/stable/docs/software/pathplanning/index.html) - Adaptive autonomous
-- [Match Replay Analysis](https://docs.wpilib.org/en/stable/docs/software/telemetry/datalog.html) - Post-match pose tracking
-
-**🎯 Next Steps**
-- [PhotonVision](https://docs.photonvision.org/) - Complete vision processing suite
-- [LimelightLib](https://docs.limelightvision.io/) - Plug-and-play vision computer
-- [Chameleon Vision](https://chameleon-vision.readthedocs.io/) - Open-source vision processing
-
-
-**🔧 Advanced Techniques**
-- [Camera Calibration](https://docs.opencv.org/4.x/dc/dbb/tutorial_py_calibration.html) - Accurate 3D positioning
-- [Pose Estimation](https://docs.wpilib.org/en/stable/docs/software/vision-processing/apriltag/apriltag-intro.html) - 6DOF target tracking
-- [Machine Learning](https://www.tensorflow.org/) - Neural network object detection
-
-**📊 Multi-Camera Systems**
-- [Stereo Vision](https://docs.opencv.org/4.x/dd/d53/tutorial_py_depthmap.html) - Depth perception
-- [360° Coverage](https://docs.photonvision.org/en/latest/docs/programming/photonlib/getting-target-data.html) - Multiple camera coordination
-
-**⚡ Real-Time Performance**
-- [GPU Acceleration](https://opencv.org/platforms/cuda/) - CUDA-accelerated processing
-- [FPGA Vision](https://www.ni.com/en-us/shop/labview/add-ons/third-party/ni-vision-for-labview.html) - Ultra-low latency processing
+> **TODO:** Redo the links list below to include relevant resources for pose estimation, Kalman filters, WPILib documentation, and vision integration. Ensure all links are up-to-date and clearly labeled for easy navigation.
 
 ---
 
