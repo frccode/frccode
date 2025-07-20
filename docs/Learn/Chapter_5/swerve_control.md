@@ -36,9 +36,9 @@ Below are some common terms associated with swerve drive:
 ### Control Definitions
 
 * **Holonomic Drive Defininition (Swerve)**
-    - Can move in any direction independent of orientation
+    - Holonomic drive systems allow robots to move in any direction without being in a specific orientation, combining forward, lateral, and rotational motion simultaneously.  
     - Each wheel can rotate and steer independently
-    - More complex but more capable
+    - [Reference](https://conceptual-innovations.com/exploring-holonomic-drives-systems-with-a-deep-dive-into-halodrive/#:~:text=Holonomic%20drive%20systems%20enable%20a,lateral%20and%20rotational%20motion%20simultaneously.)
 
 * **Trajectory Control**
     - Pre-planned or dynamically generated paths
@@ -166,7 +166,7 @@ Joystick inputs flow down to the motors on the drivetrain using a sequence shown
 
 ### Coordinate Transformation
 
-Coordinate transformation enables your FRC robot to interpret movement commands relative to the field, regardless of its current orientation. For example, during teleop, if the driver pushes the joystick forward, the robot should always move toward the opponent’s alliance wall—even if the robot is rotated or facing sideways. 
+Coordinate transformation enables your FRC robot to interpret movement commands relative to the field, regardless of its current orientation. For example, during teleop, if the driver pushes the joystick forward, the robot should always move toward the opponent’s alliance wall, even if the robot is rotated or facing sideways. 
 
 This is achieved by converting field-relative commands (from the driver’s perspective) into robot-relative wheel motions using trigonometric functions. The robot uses its gyro heading and the desired field-relative velocities to calculate the correct wheel speeds and angles, ensuring consistent and intuitive control for the driver throughout the match.
 
