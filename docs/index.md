@@ -20,6 +20,9 @@ hide:
 ## About Us 
 Currently FRCCode.org is powered by volunteer students who are passionate about programming and hope to share their knowledge with others. The website is constantly in a state of improvement and development, and is a work-in-progress. Please report any mistakes you see to the GitHub.
 
+
+
+
 ---
 
 <div class="cta" markdown>

@@ -6,6 +6,8 @@ At this point in the guide, you should have your VSCode and WPILib installed, as
 
 This module will introduce you to many beginner concepts that will be used throughout all of FRC programming using `TimedRobot` as an example. While other robot architectures are more popular and often more powerful, `TimedRobot` serves as an excellent stepping stone to introduce the fundamentals. 
 
+This training will overview/simplify explantations from [WPILib's official Zero-to-Robot guide](https://docs.wpilib.org/en/stable/docs/zero-to-robot/step-1/index.html). 
+
 ## Introduction to the TimedRobot Template
 
 WPILib provides the `TimedRobot` base class to simplify handling robot periodic actions. A TimedRobot automatically calls key methods at regular intervals (default every 20 milliseconds), allowing you to focus on writing logic rather than managing timing.
