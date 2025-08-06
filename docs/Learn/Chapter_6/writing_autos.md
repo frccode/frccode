@@ -155,6 +155,7 @@ public void calibrateWheelRadius() {
 }
 ```
 
+
 **Vision System Integration:**
 
 Wheel odometry alone can drift over time due to wheel slip, uneven surfaces, or mechanical inaccuracies, leading to increasing errors in the robot's estimated position. 
@@ -226,6 +227,8 @@ public class AutoDriveCommand extends CommandBase {
 ---
 
 ## 3. Systematic Tuning Process
+
+Tune each layer sequentially to ensure a solid foundation—if earlier layers are not properly tuned, later layers will struggle to compensate, leading to unreliable autonomous performance.
 
 ### Step 1: Motor Control Tuning
 Using visual feedback for optimal performance:
@@ -366,24 +369,33 @@ public Command getThreePieceAuto(
 }
 ```
 
-### Path Planning Integration
+### Robot Container Integration
+
 ```java
-// Using PathPlanner for trajectory generation
-public static final HashMap<String, Command> eventMap = new HashMap<>();
+// In your RobotContainer class
+public class RobotContainer {
+    private final DriveSubsystem drive = new DriveSubsystem();
+    private final SuperstructureSubsystem superstructure = new SuperstructureSubsystem();
+    private final IntakeSubsystem intake = new IntakeSubsystem();
 
-static {
-    eventMap.put("startIntake", new StartIntake(intake));
-    eventMap.put("stopIntake", new StopIntake(intake));
-    eventMap.put("prepareScore", new PrepareScore(superstructure));
-}
+    // Inline SequentialCommandGroup factory for PathPlanner-based auto
+    public Command getPathPlannerAuto() {
+        return new SequentialCommandGroup(
+            new InstantCommand(() -> drive.resetOdometry()),
+            new ParallelCommandGroup(
+                new StartIntake(intake),
+                new PrepareScore(superstructure)
+            ),
+            // Follow the generated path using PathPlanner
+            AutoBuilder.followPath(
+                PathPlannerPath.fromPathFile("ThreePiecePath")
+            ),
+            new StopIntake(intake),
+            new ScoreHigh(superstructure)
+        );
+    }
 
-public Command getAutonomousCommand() {
-    return new SequentialCommandGroup(
-        new InstantCommand(() -> resetOdometry()),
-        AutoBuilder.followPath(
-            PathPlannerPath.fromPathFile("ThreePiecePath")
-        )
-    );
+    // Auto Factories -> See above for more info
 }
 ```
 
