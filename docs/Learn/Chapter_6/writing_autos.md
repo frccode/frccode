@@ -12,12 +12,14 @@ This guide covers the technical implementation of autonomous routines for FRC ro
 
 ## 1. Architecture and Hardware Setup
 
-### Robot Design for Autonomous Success
-Certain design choices significantly impact autonomous capability. Ensure you work with your mechanical and cad subunit of your team to work out the following:
+### Robot Design/Construction for Autonomous Success
+Certain design/fabrication choices significantly impact autonomous capability. Teams have different philosophies concerning whether certain issues or capabilities fall under a software, electrical or mechanical jurisdiction. That being said, not everything can be "fixed in software" and it's up to the software developer at hand to make that determination.
+
+Below are general guidelines to help you ensure robust autonomous performance on everything "non-software" related. Ensure you work with your mechanical, electrical and CAD subunit of your team to work out the following:
 
 **Enabling Design Features:**
 
-Some mechanisms are required 
+Design mechanisms to support key autonomous tasks. For example, in 2025's "Reefscape," teams chose between ground or station intakes. Ground intakes improved autonomous performance but added design complexity. Teams had to choose which was more important to reaching their competition goals.
 
 ```java
 // Tank intake example - allows pickup while driving
@@ -32,74 +34,113 @@ public class IntakeSubsystem extends SubsystemBase {
 
 **Vision-Friendly Camera Placement:**
 
-Vision supplemented pose estimation will ensure accurate robot movoments. Ensure:
+Vision supplemented pose estimation will ensure accurate robot movements, especially as teams look to score more game pieces with faster drivebases. Ensure:
 
-- Clear sight lines to AprilTags
-- Multiple cameras for redundancy. Place cameras at different corners or heights on the robot to maximize AprilTag visibility and minimize occlusion from mechanisms or game pieces.
-- Protected from game piece interference
+- Clear sight lines to commonly used AprilTags (ie. At scoring and loading zones)
+- Place cameras at different corners or heights on the robot to maximize AprilTag visibility and minimize occlusion from mechanisms or game pieces.
+- Protected from game piece interference and damage
+- Multiple cameras for more points of triangulation to estimate your robot's position.
 
 **Fast, Consistent Mechanisms:**
 - Minimize/optimize areas of handoff and degrees of freedom
-- Repeatable positioning
-- Robust sensor feedback
+- Repeatable positioning without mechanism backlash and robust sensor feedback.
+- Extending mechanisms past the frame increases torque and risk of damage. Ensure mechanisms (elevators, pivot arms, etc.) are well-supported for accuracy and durability.
 
-### Foundation Layer Implementation
-```java
-// Motor controller setup with voltage compensation
-public class DriveSubsystem extends SubsystemBase {
-    private final TalonFX leftMotor = new TalonFX(1);
-    private final TalonFX rightMotor = new TalonFX(2);
-    
-    public DriveSubsystem() {
-        // Essential for consistent autonomous performance
-        leftMotor.configVoltageCompSaturation(12.0);
-        leftMotor.enableVoltageCompensation(true);
-        
-        rightMotor.configVoltageCompSaturation(12.0);  
-        rightMotor.enableVoltageCompensation(true);
-    }
-}
-```
+**Reliable Wiring for Autonomous Consistency:**
+
+Autonomous performance also depends on robust electrical connections. Poor wiring can cause intermittent failures, sensor dropouts, or unexpected resets than can make troubleshooting electrical vs programming errors difficult.
+
+Best Practices:
+- Securing all connectors with cable ties or heat shrink to prevent vibration-induced disconnects.
+- Label all connectors for quick troubleshooting.
+- Perform a "wiggle test"—gently move wires while the robot is powered to check for intermittent faults.
+
+Example: CAN Bus Reliability Checklist:
+- Terminate CAN bus at both ends with 120Ω resistors.
+- Keep CAN wiring as short and direct as possible.
+- Use twisted pair wire for CAN to reduce noise.
+- Monitor CAN utilization and error counts in telemetry.
 
 ---
 
 ## 2. Control System Implementation
 
-Each of these layers ensure presice autonomous movement. It is organized this way to make it easier to understand how each component of our autonomous control system affects auto routines. Keep these software configurations in mind when writing/debugging autos. 
+Effective autonomous routines depend on a well-tuned software foundation, with the "first layer" starting with reliable motor control. 
+
+Case in point, many teams have struggled with trajectory control for swerve because they only focused on tuning their pathplanning tool's pid rather than building their control system from the ground up ensuring the motors themselves were tuned properly.
+
+Here are the layers that build up the foundation of a well constructed autonomous control system.
 
 ### Layer 1: Motor Control
-The foundation of autonomous control starts with precise motor control:
-Accurately profiled and tuned motors are crucial for autonomous systems because they ensure that the robot moves predictably and precisely according to the planned path. Here’s why this matters:
-- **Consistent Movement:** Properly tuned motors respond to commands in a repeatable way, ensuring the robot’s actions match the software’s expectations every time.
-- **Smooth Trajectories and Profiles:** Motion profiling (such as Motion Magic) enables smooth acceleration and deceleration, reducing mechanical stress on mechanisms and improving path accuracy to avoid collisions and reach percise locations.
-- **Error Reduction:** Well-tuned PID and feedforward values minimize overshoot, oscillation, and drift—crucial for following lines, stopping at targets, or interacting with game pieces.
-- **Battery Compensation:** Voltage compensation ensures consistent robot performance regardless of battery charge, preventing slowdowns or unpredictable behavior during a auto sequence. Differences in voltage can cause differing hard to reproduce behaviors with the robot.
 
-**TalonFX Voltage Compensation:**
+The foundation of autonomous control starts with precise motor control. For a deeper dive into PID control fundamentals, see [Basic PID Control](../PID.md). However, here are some motor configurations to take note of that teams have used to ensure consistent auto performance.
+
+**TalonFX (Phoenix 6) Voltage Compensation:**  
+Ensure consistent motor output regardless of battery voltage.  
 ```java
-// Consistent performance regardless of battery voltage
-talonFX.configVoltageCompSaturation(12.0);
-talonFX.enableVoltageCompensation(true);
+// Set voltage compensation saturation to 12V and enable it
+talonFX.getConfigurator().apply(new VoltageCompensationConfigs().withSaturation(12.0));
+talonFX.setControl(new VoltageOut(0)); // Use voltage control mode if needed
 ```
 
-**Motion Profiling Setup:**
+**Motion Profiling Setup:**  
+For more on motion profiling, see [Simple Motion Profiling](../simple_profiling.md).  
 ```java
-// Smooth, predictable motion
-TalonFXConfiguration config = new TalonFXConfiguration();
-config.slot0.kP = 0.1;
-config.slot0.kI = 0.001;  
-config.slot0.kD = 0.01;
-config.slot0.kF = 0.05;  // Feedforward for velocity
+// Configure slot gains for velocity/position control
+Slot0Configs slot0 = new Slot0Configs();
+slot0.kP = 0.1;
+slot0.kI = 0.001;
+slot0.kD = 0.01;
+slot0.kV = 0.05; // Feedforward for velocity
+talonFX.getConfigurator().apply(slot0);
 
-// Motion Magic for smooth profiles
-config.motionCruiseVelocity = 15000; // sensor units per 100ms
-config.motionAcceleration = 6000;    // sensor units per 100ms per second
+// Motion Magic (Motion Profile) configuration
+MotionMagicConfigs mm = new MotionMagicConfigs();
+mm.MotionMagicCruiseVelocity = 15000; // sensor units per second
+mm.MotionMagicAcceleration = 6000;    // sensor units per second^2
+talonFX.getConfigurator().apply(mm);
+```
+
+**Current Limiting:**  
+Protect against brownouts and ensure consistent acceleration.  
+```java
+CurrentLimitsConfigs currentLimits = new CurrentLimitsConfigs();
+currentLimits.SupplyCurrentLimitEnable = true;
+currentLimits.SupplyCurrentLimit = 35.0;
+currentLimits.SupplyCurrentThreshold = 40.0;
+currentLimits.SupplyTimeThreshold = 0.5;
+talonFX.getConfigurator().apply(currentLimits);
+```
+
+**Neutral Deadband Adjustment:**  
+Reduce deadband for more precise low-speed control.  
+```java
+talonFX.getConfigurator().apply(new MotorOutputConfigs().withNeutralDeadband(0.01));
+```
+
+**Brake/Coast Mode Selection:**  
+Use brake mode for precise stopping in autonomous.  
+```java
+talonFX.setNeutralMode(NeutralModeValue.Brake);
+```
+
+**Open Loop Ramp Rate:**  
+Smooth acceleration to prevent wheel slip.  
+```java
+talonFX.getConfigurator().apply(new OpenLoopRampsConfigs().withOpenLoopRampPeriod(0.2));
+```
+
+**Closed Loop Ramp Rate:**  
+Prevents sudden jumps in velocity setpoints.  
+```java
+talonFX.getConfigurator().apply(new ClosedLoopRampsConfigs().withClosedLoopRampPeriod(0.1));
 ```
 
 ### Layer 2: Localization and Sensors
 
-**Wheel Odometry Calibration:**
-Wheel odometry estimates the robot’s position by tracking wheel rotations. If the wheel radius or encoder values are incorrect, even small errors quickly accumulate, causing the robot to drift off its intended path. Proper calibration ensures that distance measurements match real-world movement, which is essential for following trajectories and reaching field objectives precisely.
+#### Wheel Odometry Calibration
+
+Wheel odometry calibration ensures your robot's position estimates from encoders are accurate. It corrects for errors like wheel size differences, wheelbase mismeasurements, and encoder inaccuracies. Proper calibration reduces drift, improves path following, and should be repeated after wheel changes or significant use. Below is a simple calculation that determines the "odometry wheel radius" for driving.
 
 ```java
 // Critical: Determine actual wheel radius on carpet
@@ -116,14 +157,10 @@ public void calibrateWheelRadius() {
 
 
 **Vision System Integration:**
-> &nbsp;&nbsp;Vision systems (like **PhotonVision**) provide **absolute position updates** by detecting field targets.  
-> &nbsp;&nbsp;A well-tuned vision pipeline can:
-> - &nbsp;&nbsp;**Correct for odometry drift**
-> - &nbsp;&nbsp;**Handle changing lighting**
-> - &nbsp;&nbsp;**Filter out false positives**
->
-> &nbsp;&nbsp;This allows the robot to **re-localize itself**, especially after collisions or wheel slip, maintaining accuracy throughout the autonomous period.
-For a deeper dive into vision system concepts, see [Vision System Explanation](../vision_explanation.md).
+
+Wheel odometry alone can drift over time due to wheel slip, uneven surfaces, or mechanical inaccuracies, leading to increasing errors in the robot's estimated position. 
+
+Integrating vision allows the robot to periodically correct its pose estimate using absolute field references. This fusion of sensor data combines the short-term accuracy and responsiveness of wheel odometry with the long-term reliability of vision-based localization, resulting in more precise autonomous movement, better path following, and improved scoring consistency, especially in complex or multi-piece autonomous routines.
 
 ```java
 public class VisionSubsystem extends SubsystemBase {
@@ -196,66 +233,9 @@ Tune each layer sequentially to ensure a solid foundation—if earlier layers ar
 ### Step 1: Motor Control Tuning
 Using visual feedback for optimal performance:
 
-**Feedforward Tuning (kS, kV, kA):**
-```java
-// 1. Find static friction (kS)
-// Increase voltage until mechanism just starts moving
-double kS = findMinimumVoltageToMove();
-
-// 2. Find velocity feedforward (kV)  
-// Run at constant velocity, measure voltage needed
-double kV = testVoltage / testVelocity;
-
-// 3. Tune visually - setpoint vs actual velocity should be parallel
-```
-
-**PID Tuning:**
-```java
-// 4. Add proportional gain until oscillation
-// 5. Back off by 25-50%  
-// 6. Add derivative to reduce overshoot
-// 7. Add integral only if steady-state error exists
-```
-
 ### Step 2: Localization Tuning
 
-**Camera Calibration:**
-```java
-// Lens calibration first - use checkerboard patterns
-public void calibrateLens() {
-    // Follow PhotonVision calibration process
-    // Bad lens calibration makes position calibration impossible
-}
-
-// Position calibration second
-public void calibratePosition() {
-    // Start with measured physical offsets
-    // Test close and far from AprilTags
-    // Verify detected position matches actual position
-}
-```
-
-**Sensor Fusion Tuning:**
-```java
-// Balance accuracy vs stability
-public void tuneSensorFusion() {
-    // Increase vision trust until jitter becomes unacceptable
-    // Decrease until path following performance degrades
-    // Find optimal balance point
-}
-```
-
 ### Step 3: Path Following Tuning
-```java
-// Start with aggressive P terms
-xController.setP(2.0);
-yController.setP(2.0);
-rotationController.setP(1.0);
-
-// Increase until jitter occurs during path following
-// Back off to stable values
-// Tune BEFORE adding vision - vision can introduce oscillations
-```
 
 ---
 
@@ -340,7 +320,7 @@ public class SuperstructureSubsystem extends SubsystemBase {
 
 ### Command-Based Autonomous Structure (Inline Factory Implementation)
 
-While there are many different command based formats for constructing autonomous commands based on each teams individual robot code structure preferences, this is the simplest implementation.
+While there are many different command based formats for constructing autonomous commands based on each team's individual robot code structure preferences, this is the simplest implementation.
 
 Store these autonomous command and others like it within your "RobotContainer" Class. This makes it easy for you to pass in the subsystems as parameters needed to run the autonomous program.
 ```java
@@ -525,140 +505,14 @@ public void periodic() {
     Logger.recordOutput("Auto/State", getCurrentState().name());
 }
 ```
-
-### Common Problems & Solutions
-
-**Problem:** Robot doesn't follow paths accurately
-- **Solution:** Check localization first - bad pose = bad path following
-- **Debug:** Plot commanded vs actual path, check for sensor drift
-
-**Problem:** Autonomous works in practice but fails in competition  
-- **Solution:** Test with different lighting, carpet conditions, battery levels
-- **Debug:** Log environmental factors, compare practice vs competition data
-
-**Problem:** Timing is inconsistent between runs
-- **Solution:** Check for blocking commands, verify mechanism speeds
-- **Debug:** Add timing telemetry to each command
-
-**Problem:** Robot collides with alliance partners
-- **Solution:** Review path planning, add more conservative routing
-- **Debug:** Analyze field positioning data from matches
-
----
-
-## 8. Advanced Techniques
-
-### Dynamic Path Planning
-```java
-// Adapt paths based on field conditions
-public Command getAdaptiveAuto() {
-    return new ConditionalCommand(
-        getAggressiveThreePiece(),
-        getConservativeTwoPiece(),
-        () -> alliancePartnersHaveReliableAuto()
-    );
-}
-```
-
-### Vision-Assisted Scoring
-```java  
-public class VisionAssistedScore extends CommandBase {
-    @Override
-    public void execute() {
-        Optional<PhotonTrackedTarget> target = getTarget();
-        
-        if (target.isPresent()) {
-            // Use vision for final alignment
-            Transform3d robotToTarget = target.get().getBestCameraToTarget();
-            ChassisSpeeds correction = calculateCorrectionSpeeds(robotToTarget);
-            driveSubsystem.drive(correction);
-        }
-    }
-}
-```
-
-### Failure Recovery
-```java
-// Handle missed game pieces gracefully
-public class RobustIntakeCommand extends CommandBase {
-    private final Timer timeoutTimer = new Timer();
-    
-    @Override
-    public void initialize() {
-        timeoutTimer.restart();
-    }
-    
-    @Override
-    public boolean isFinished() {
-        return gamePieceAcquired() || timeoutTimer.hasElapsed(2.0);
-    }
-    
-    @Override
-    public void end(boolean interrupted) {
-        if (!gamePieceAcquired()) {
-            // Switch to backup autonomous routine
-            CommandScheduler.getInstance().schedule(getBackupAuto());
-        }
-    }
-}
-```
-
----
-
-## 9. Practice Project
-
-**Build this step-by-step:**
-
-### Phase 1: Foundation (Week 1-2)
-1. **Swerve Drive Setup** - Get basic driving working with odometry
-2. **Path Following** - Implement and tune PID controllers for trajectory following  
-3. **Vision Pipeline** - Set up AprilTag detection and pose estimation
-
-### Phase 2: Mechanisms (Week 3-4)
-1. **State Machine** - Implement superstructure state management
-2. **Mechanism Control** - Tune all mechanism PID controllers
-3. **Sensor Integration** - Add game piece detection, limit switches
-
-### Phase 3: Integration (Week 5-6)  
-1. **Simple Autonomous** - One game piece + mobility
-2. **Complex Routines** - Multi-piece autonomous with path planning
-3. **Alliance Coordination** - Multiple autonomous options
-
-### Phase 4: Refinement (Week 7-8)
-1. **Competition Testing** - Test on official field elements
-2. **Failure Handling** - Add robust error recovery
-3. **Performance Optimization** - Fine-tune for consistency
-
-**Success criteria:**
-- Consistently scores planned number of game pieces
-- Reliable execution across different field conditions  
-- Smooth, professional-looking movement
-- Provides strategic advantage in matches
-
 ---
 
 ## Where to Go Next
 
-**Ready for advanced autonomous? Explore these:**
+**Linked below are extra resources and disscussions for autonomous performance**
 
-**🎯 Advanced Path Planning**
-- [PathPlanner](https://pathplanner.dev/) - GUI-based path planning with event markers
-- [Choreo](https://sleipnirgroup.github.io/Choreo/) - Trajectory optimization and generation
+**Competition Strategies**
 
-**🤖 System Identification**  
-- [SysId Tool](https://docs.wpilib.org/en/stable/docs/software/pathplanning/system-identification/index.html) - Automatically determine optimal control gains
-- [Feedforward Characterization](https://docs.wpilib.org/en/stable/docs/software/advanced-controls/controllers/feedforward.html) - Physics-based control
-
-**📊 Advanced Control**
-- [State-Space Control](https://docs.wpilib.org/en/stable/docs/software/advanced-controls/state-space/state-space-intro.html) - Modern control theory
-- [Pose Estimation](https://docs.wpilib.org/en/stable/docs/software/advanced-controls/geometry/pose.html) - Multi-sensor localization
-
-**⚡ Competition Strategies**
-- [Auto Selection](https://docs.wpilib.org/en/stable/docs/software/dashboards/smartdashboard/choosing-an-autonomous-program.html) - Dynamic autonomous choosing
-- [Alliance Coordination](https://www.chiefdelphi.com/c/technical/programming/12) - Multi-robot autonomous planning
+> **TODO:** The links in this section are not working properly and need to be redone.
 
 ---
-
-**Remember:** "There's more to a good auto than fancy code." Focus on systematic implementation, thorough testing, and strategic thinking about what will actually help you win matches.
-
-**Next steps:** Advanced autonomous coordination and competition strategy development.
