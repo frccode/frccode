@@ -7,5 +7,5 @@ We will also provide a oversimplified usage guide. However it is recommended tha
 ### Applications
 
 - [WPILib](./2_wpilib.md)
-- [National Instruments Game Tools](./3_national_instruments.md)
+- [National Instruments Game Tools](./3_national_instruments._and_simple_robot_connection.md)
 - [Github & Github Desktop](./4_Version_Control_intro.md)
