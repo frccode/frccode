@@ -129,7 +129,7 @@ public class IntakeSubsystem extends SubsystemBase {
 ### Subsystem Best Practices
 
 1. **Encapsulation**: Hide hardware details inside the subsystem
-2. **Single Responsibility**: Each subsystem should control one functional area (e.g., the intake should only be responsible for intake roller movement)
+2. **Single Responsibility**: In each subsystem all the motors should always be getting commands at the same time. For example flywheels should be separated from the pivot of a shooter because you might want to spin up the flywheels before moving the pivot.
 3. **Provide Clean Interface**: Offer methods that commands can easily use
 4. **Use periodic()**: For continuous monitoring and updates
 
