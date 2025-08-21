@@ -8,12 +8,11 @@ The National Instruments (NI) Game Tools are essential software packages used in
 
 ## How to Download
 
-1. Visit the official NI Game Tools download page:  
-    [https://www.ni.com/en/support/downloads/drivers/download.frc-game-tools.html?#553883](https://www.ni.com/en/support/downloads/drivers/download.frc-game-tools.html?#553883)
+1. Visit the official NI Game Tools download page: [FRC Game Tools Download - NI](https://www.ni.com/en/support/downloads/drivers/download.frc-game-tools.html?#553883)
 2. Select the appropriate version for your competition year.
 3. Create an NI account
-    - >**Note:** You will need to log in for every instance you download Game Tools onto a different computer for your team. It is recommended to have a team account and password to make the setup of multiple computers easier. 
-4. Follow this guide [WPILib Game Tools Installation Guide](https://docs.wpilib.org/en/stable/docs/zero-to-robot/step-2/frc-game-tools.html) for installation.
+    - **Note:** You will need to log in for every instance you download Game Tools onto a different computer for your team. It is recommended to have a team account and password to make the setup of multiple computers easier. 
+4. Follow the [WPILib Game Tools Installation Guide](https://docs.wpilib.org/en/stable/docs/zero-to-robot/step-2/frc-game-tools.html) for installation.
 
 ## How the Game Tools Work
 
