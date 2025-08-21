@@ -17,7 +17,7 @@ The National Instruments (NI) Game Tools are essential software packages used in
 ## How the Game Tools Work
 
 ### FRC Driver Station:
-![alt text](driverStation.png)
+![alt text](driverstation.png)
 
  The main interface for controlling your robot during matches and practice. It manages robot communication, enables/disables the robot, and displays diagnostic information.
 
