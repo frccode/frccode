@@ -131,7 +131,7 @@ public class IntakeSubsystem extends SubsystemBase {
 1. **Encapsulation**: Hide hardware details inside the subsystem
 2. **Single Responsibility**: In each subsystem all the motors should always be getting commands at the same time. For example flywheels should be separated from the pivot of a shooter because you might want to spin up the flywheels before moving the pivot.
 3. **Provide Clean Interface**: Offer methods that commands can easily use
-4. **Use periodic()**: For continuous monitoring and updates
+4. **Use periodic()**: For continuous monitoring and logging unless you are using PID control (see the [PID section](../Chapter_4/PID.md#3-tutorial-implementation) for more info)
 
 ### Reference material
 
