@@ -3,6 +3,7 @@
 The National Instruments (NI) Game Tools are essential software packages used in the FIRST Robotics Competition (FRC) to configure, manage, and operate your robot's control system. It provides the necessary utilities for communication between your driver station and the robot, as well as for imaging and firmware updating the roboRIO.
 
 >**Note:** RoboRIO is the term used to describe the central computer that runs your code project on your FRC robot. A picture of it is shown below.
+
 ![alt text](imageRoborio.png)
 
 ## How to Download
