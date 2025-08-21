@@ -11,7 +11,6 @@ Follow the instructions on the [official WPILib installation guide](https://docs
 
 - **"WPILib VSCode vs VSCode":** WPILib uses its own version of VSCode that contains plugins specific for FRC, enabling you to build and use WPILib templates. Do not confuse this with a preexisting installation of VSCode.
 
-
 ## VS Code Exploration
 ![alt text](wpilibvscodeimage.png)
 Wpilib vscode is where you will spend the majority of your coding time as an FRC programmer. Hre are some key layout features to take note of
@@ -41,8 +40,8 @@ WPILib includes many other tools that are helpful in robot programming. The most
 
 ### Generally Used WPILIB programs
 
-- **AdvantageScope**: Visualizes and analyzes robot log data for debugging and performance review.
-- **Elastic**: A tool for managing and visualizing log data, often used with AdvantageScope.
+- [**AdvantageScope**](https://docs.advantagescope.org/): Visualizes and analyzes robot log data for debugging and performance review.
+- [**Elastic**](https://frc-elastic.gitbook.io/docs): A tool for managing and visualizing log data, often used with AdvantageScope.
 - **roboRIO Team Number Setter**: Sets the team number on the roboRIO controller.
 - **SmartDashboard**: Another dashboard tool for displaying and controlling robot data.
 - **SysId**: System identification tool for characterizing robot mechanisms.
