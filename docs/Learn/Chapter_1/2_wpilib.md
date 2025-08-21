@@ -1,14 +1,10 @@
 # WPIlib and Associated Tools
 
-This section covers a brief overview of the WPILIB program and tools you will use as part of the WPIlib instalation.
+This section covers a brief overview of the WPILIB program and tools you will use as part of the WPIlib installation.
 
 
-## Instalation
-1. Go to the latest releases for WPILIB linked here [Download Latest WPILib Release](https://github.com/wpilibsuite/allwpilib/releases/) and download the version of WPILIB that is applicable to your system setup:
-![alt text](wpilib_overview.png)
-2. Follow the instructions provided to install the latest version of WPILib here: [Official WPILib installation guide](https://docs.wpilib.org/en/stable/docs/zero-to-robot/step-2/wpilib-setup.html) 
-
-### Tips for quality of life during Instalation
+## Installation
+Follow the instructions on the [official WPILib installation guide](https://docs.wpilib.org/en/stable/docs/zero-to-robot/step-2/wpilib-setup.html). Follow the below tips for quality of life during the installation.
 
 - You should be aware of the version year you are downloading. WPILIB releases alpha and beta versions for upcoming years that can be confused as the latest version. Download the latest stable release of WPILIB for your year.
 - Because the WPILib installer is a large file, if you need to install it on multiple computers, consider downloading it once and transferring it via a USB drive. This can save time and bandwidth during the installation process.
