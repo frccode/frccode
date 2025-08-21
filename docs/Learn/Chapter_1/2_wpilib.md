@@ -4,7 +4,7 @@ This section covers a brief overview of the WPILIB program and tools you will us
 
 
 ## Installation
-Follow the instructions on the [official WPILib installation guide](https://docs.wpilib.org/en/stable/docs/zero-to-robot/step-2/wpilib-setup.html). Follow the below tips for quality of life during the installation.
+Follow the instructions on the [official WPILib installation guide](https://docs.wpilib.org/en/stable/docs/zero-to-robot/step-2/wpilib-setup.html). Keep the below tips in mind for quality of life during the installation.
 
 - You should be aware of the version year you are downloading. WPILIB releases alpha and beta versions for upcoming years that can be confused as the latest version. Download the latest stable release of WPILIB for your year.
 - Because the WPILib installer is a large file, if you need to install it on multiple computers, consider downloading it once and transferring it via a USB drive. This can save time and bandwidth during the installation process.
